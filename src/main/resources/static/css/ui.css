@@ -1,0 +1,109 @@
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0px;
+  border: 0;
+  /*overflow: hidden;*/ /*  Disable scrollbars */
+  display: block;  /* No floating content on sides */
+
+  background-color: black;
+  color: rgb(140, 140, 140);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 13px;
+}
+
+.big {
+  font-size: 150%;
+}
+
+.small {
+  font-size: 80%;
+}
+
+header {
+  text-align: center;
+  cursor: move;
+}
+
+.yafu-draggable {
+  width: 200px;
+  height: 50px;
+  padding: 0.5em;
+  position: absolute;
+}
+
+.yafu-draggable h3 {
+  text-align: center;
+  margin: 0;
+}
+
+.ui-slider-handle.yafu-slider-handle {
+  width: 5em;
+  height: 1.6em;
+  top: 50%;
+  margin-top: -.8em;
+  text-align: center;
+  line-height: 1.6em;
+}
+
+.rounded-corners {
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  -khtml-border-radius: 5px;
+  border-radius: 5px;
+}
+
+label.small {
+
+}
+
+.slider-wrapper {
+  -moz-border-radius: 25px;
+  -webkit-border-radius: 25px;
+  -khtml-border-radius: 25px;
+  border-radius: 25px;
+  background-color: #4a4a4a;
+  padding: 1em;
+  padding-right: 5em;
+  position: absolute;
+}
+
+.reading-wrapper {
+  -moz-border-radius: 25px;
+  -webkit-border-radius: 25px;
+  -khtml-border-radius: 25px;
+  border-radius: 25px;
+  background-color: #4a4a4a;
+  padding: 1em;
+  position: absolute;
+}
+
+.clock-wrapper {
+  position: absolute;
+}
+
+.ui-resizable-helper { border: 2px dotted #00F; }
+
+.grab {
+  cursor: -webkit-grab;
+  cursor: grab;
+}
+
+.stick-top {
+  position: absolute;
+  top: 11px;
+}
+
+.left {
+  width:35px;
+  float:left;
+}
+
+.middle-remain {
+  width: 100%;
+}
+
+.right {
+  width:35px;
+  float:right;
+}

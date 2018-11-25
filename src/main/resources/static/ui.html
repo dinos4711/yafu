@@ -1,0 +1,131 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Yet Another FHEM UI</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" href="css/jquery-ui.css">
+    <link rel="stylesheet" href="css/jquery.toast.css">
+    <link rel="stylesheet" href="css/ui.css">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script src="js/jquery.ui.touch-punch.min.js"></script>
+    <script src="js/jquery.toast.js"></script>
+    <script src="js/fhemweb.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/yafu-slider.js"></script>
+    <script src="js/yafu-reading.js"></script>
+    <script src="js/yafu-clock.js"></script>
+
+
+    <style>
+      fieldset {
+          padding: 1em;
+          font:80%/1 sans-serif;
+      }
+      label {
+          float:left;
+          width:25%;
+          margin-right:0.5em;
+          padding-top:0.2em;
+          text-align:right;
+          font-weight:bold;
+      }
+      input.text {
+          margin-bottom:12px; width:55%; padding: .4em;
+      }
+    </style>
+
+</head>
+<body style="background-color: #000000">
+
+<canvas id="backgroundCanvas" style = "position: absolute; left: 0px; top: 0px;"></canvas>
+
+<div id="uicontainer">
+
+</div>
+
+<div id="fhemConfigDialog" title="Konfiguration der FHEM-Verbindung">
+    <form>
+        <fieldset>
+            <label for="fhemHost">Host</label>
+            <input type="text" name="fhemHost" id="fhemHost" placeholder="FHEM URL" class="text ui-widget-content ui-corner-all">
+            <br />
+            <label for="fhemUser">Username</label>
+            <input type="text" name="fhemUser" id="fhemUser" placeholder="Username" class="text ui-widget-content ui-corner-all">
+            <br />
+            <label for="fhemPassword">Passwort</label>
+            <input type="password" name="fhemPassword" id="fhemPassword" placeholder="Password" class="text ui-widget-content ui-corner-all">
+            <br />
+            <p id="status"></p>
+            <!-- Allow form submission with keyboard without duplicating the dialog button -->
+            <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
+        </fieldset>
+    </form>
+</div>
+
+<div id="mainDialog" title="Menu">
+    <ul id="mainMenu">
+        <li><div id="menu_mode">Set edit mode</div></li>
+        <li><div id="menu_settings" class="canGetDisabled" >Settings</div></li>
+        <li><div id="menu_clock" class="canGetDisabled" >Add clock</div></li>
+        <li><div id="menu_add_new_cell" class="canGetDisabled" >Add cell</div></li>
+        <li><div id="menu_add_new_slider" class="canGetDisabled" >Add slider</div></li>
+        <li><div id="menu_add_new_reading" class="canGetDisabled" >Add reading</div></li>
+    </ul>
+</div>
+
+<div id="newSliderDialog" title="New Slider">
+    <p>Select a device and a device setter</p>
+    <table>
+        <tr>
+            <td><label for="selectSetterDevice">Device</label></td>
+            <td>
+                <select id="selectSetterDevice">
+                    <option>Please wait ...</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td><label for="selectSetterSetter">Setter</label></td>
+            <td>
+                <select id="selectSetterSetter">
+                    <option>Please wait ...</option>
+                </select>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div id="newReadingDialog" title="New Reading">
+    <p>Select a device and a device setter</p>
+    <table>
+        <tr>
+            <td><label for="selectReadingDevice">Device</label></td>
+            <td>
+                <select id="selectReadingDevice">
+                    <option>Please wait ...</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td><label for="selectReadingReading">Setter</label></td>
+            <td>
+                <select id="selectReadingReading">
+                    <option>Please wait ...</option>
+                </select>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<script>
+
+
+
+</script>
+
+</body>
+</html>
