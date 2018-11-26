@@ -9,8 +9,7 @@ class YafuReading {
         <div ui-uuid="' + this.cell.id + '" title="' + this.cell.name + ' : ' + this.cell.reading + '" yafu-inform="' + this.cell.device + '-' + this.cell.reading + '">\
           ?\
         </div>\
-        <button id="button-close-' + this.cell.id + '" class="hideable" style="position: absolute; top: 0px; right: -18px; width: 18px; height: 18px;"></button>\
-        <button id="button-settings-' + this.cell.id + '" class="hideable" style="position: absolute; top: 0px; right: 14px; width: 18px; height: 18px;"></button>\
+        <button id="button-close-' + this.cell.id + '" class="hideable" style="position: absolute; top: -10px; right: -18px; width: 18px; height: 18px;"></button>\
     ';
 
     var cellElement = document.createElement("div");
@@ -19,6 +18,12 @@ class YafuReading {
     cellElement.innerHTML = myContent;
 
     document.getElementById("uicontainer").appendChild(cellElement);
+
+    $( "div[draggable-id=" + this.cell.id + "]" ).contextmenu(function() {
+      if (config.mode == 'edit') {
+        alert( "Handler for .contextmenu() called." );
+      }
+    });
 
     if (typeof this.cell.position == 'undefined') {
       this.cell.position = {top: 50, left: 10};
@@ -38,7 +43,7 @@ class YafuReading {
         if (sendToServer) {
           _this.cell.position = ui.position;
           _this.cell.size = ui.size;
-          _this.sendReadingToServer(_this.cell);
+          sendCellToServer(_this.cell);
         }
       },
       drag: function( event, ui ) {
@@ -56,7 +61,7 @@ class YafuReading {
         $("div[ui-uuid=" + _this.cell.id + "]").text(_this.lastReading);
         _this.cell.position = $(this).position();
         _this.cell.size = { width: $(this).width(), height: $(this).height() };
-        _this.sendReadingToServer(_this.cell);
+        sendCellToServer(_this.cell);
       }
     }).resizable({
         minWidth: 10,
@@ -69,7 +74,7 @@ class YafuReading {
           $("div[ui-uuid=" + _this.cell.id + "]").text(_this.lastReading);
           _this.cell.position = ui.position;
           _this.cell.size = ui.size;
-          _this.sendReadingToServer(_this.cell);
+          sendCellToServer(_this.cell);
         }
     });
 
@@ -88,12 +93,6 @@ class YafuReading {
       $("div[draggable-id=" + _this.cell.id + "]").remove();
     });
 
-    $("button[id=button-settings-" + this.cell.id + "]").button({
-      icon: "ui-icon-gear",
-      showLabel: false
-    }).on("click", function() {
-      openSettings();
-    });
   }
 
   openSettings() {
@@ -108,42 +107,6 @@ class YafuReading {
       this.lastReading = value;
     }
 
-  }
-
-  sendReadingToServer(cell) {
-  /*
-      {
-        "type": "Reading",
-        "name": "Wohnbereich",
-        "id": "e758d716-f7cb-4e73-9c18-15c1c8e3e831",
-        "device": "WT_Wohnbereich",
-        "reading": "desiredTemperature",
-        "position": { left: "0", top: "0"},
-        "size": { width: "200", height: "50"},
-        "views": []
-      }
-  */
-
-       $.ajax({
-            type: "GET",
-            url: "sendCellToServer",
-            data: {
-                cell: JSON.stringify(cell),
-                XHR: "1"
-            },
-            contentType: "application/json; charset=utf-8",
-       		error: function(data) {
-       		    $.toast({
-                           heading: 'Error',
-                           text: JSON.stringify(cell),
-                           loader: false,
-                           hideAfter: 1000,
-                           showHideTransition: 'slide',
-                           icon: 'error'
-                       });
-       		}
-
-           });
   }
 
 }

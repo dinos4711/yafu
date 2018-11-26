@@ -61,7 +61,7 @@ class YafuSlider {
           _this.cell.position = ui.position;
           _this.cell.size = ui.size;
           _this.cell.values = _this.values.join();
-          _this.sendSliderToServer(_this.cell);
+          sendCellToServer(_this.cell);
         }
       },
       drag: function( event, ui ) {
@@ -80,7 +80,7 @@ class YafuSlider {
         _this.cell.position = $(this).position();
         _this.cell.size = { width: $(this).width(), height: $(this).height() };
         _this.cell.values = _this.values.join();
-        _this.sendSliderToServer(_this.cell);
+        sendCellToServer(_this.cell);
       }
     }).resizable({
         grid: [ gridSize, gridSize ],
@@ -92,14 +92,14 @@ class YafuSlider {
           _this.cell.position = ui.position;
           _this.cell.size = ui.size;
           _this.cell.values = _this.values.join();
-          _this.sendSliderToServer(_this.cell);
+          sendCellToServer(_this.cell);
         }
     });
 
     $("div[label-id=" + this.cell.id + "]").draggable({
       stop: function( event, ui ) {
         _this.cell.labelPosition = $(this).position();
-        _this.sendSliderToServer(_this.cell);
+        sendCellToServer(_this.cell);
       }
     });
 
@@ -188,43 +188,6 @@ class YafuSlider {
       }
     }
 
-  }
-
-  sendSliderToServer(cell) {
-  /*
-      {
-        "type": "Slider",
-        "name": "Wohnbereich",
-        "id": "e758d716-f7cb-4e73-9c18-15c1c8e3e831",
-        "device": "WT_Wohnbereich",
-        "setter": "desiredTemperature",
-        "values": "eco,comfort,boost,auto,off,5.0,5.5,6.0,6.5,7.0,7.5,8.0,8.5,9.0,9.5,10.0,10.5,11.0,11.5,12.0,12.5,13.0,13.5,14.0,14.5,15.0,15.5,16.0,16.5,17.0,17.5,18.0,18.5,19.0,19.5,20.0,20.5,21.0,21.5,22.0,22.5,23.0,23.5,24.0,24.5,25.0,25.5,26.0,26.5,27.0,27.5,28.0,28.5,29.0,29.5,30.0,on",
-        "position": { left: "0", top: "0"},
-        "size": { width: "200", height: "50"},
-        "views": []
-      }
-  */
-
-       $.ajax({
-            type: "GET",
-            url: "sendCellToServer",
-            data: {
-                cell: JSON.stringify(cell),
-                XHR: "1"
-            },
-            contentType: "application/json; charset=utf-8",
-       		error: function(data) {
-       		    $.toast({
-                           heading: 'Error',
-                           text: JSON.stringify(cell),
-                           loader: false,
-                           hideAfter: 1000,
-                           showHideTransition: 'slide',
-                           icon: 'error'
-                       });
-       		}
-
-           });
   }
 
 }

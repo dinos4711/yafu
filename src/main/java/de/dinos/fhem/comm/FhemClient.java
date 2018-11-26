@@ -7,15 +7,26 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.conn.socket.LayeredConnectionSocketFactory;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509ExtendedTrustManager;
 import java.io.IOException;
+import java.net.Socket;
 import java.net.URLEncoder;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -51,8 +62,56 @@ public class FhemClient {
     this.user = user;
     this.password = password;
 
+    // Create a trust manager that does not validate certificate chains
+    TrustManager[] trustAllCerts = new TrustManager[]{
+        new X509ExtendedTrustManager() {
+          @Override
+          public void checkClientTrusted(X509Certificate[] x509Certificates, String s, Socket socket) throws CertificateException {
+
+          }
+
+          @Override
+          public void checkServerTrusted(X509Certificate[] x509Certificates, String s, Socket socket) throws CertificateException {
+
+          }
+
+          @Override
+          public void checkClientTrusted(X509Certificate[] x509Certificates, String s, SSLEngine sslEngine) throws CertificateException {
+
+          }
+
+          @Override
+          public void checkServerTrusted(X509Certificate[] x509Certificates, String s, SSLEngine sslEngine) throws CertificateException {
+
+          }
+
+          public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+            return new X509Certificate[0];
+          }
+
+          public void checkClientTrusted(
+              java.security.cert.X509Certificate[] certs, String authType) {
+          }
+
+          public void checkServerTrusted(
+              java.security.cert.X509Certificate[] certs, String authType) {
+          }
+        }
+    };
+
+    LayeredConnectionSocketFactory sslSocketFactory = null;
+    try {
+      SSLContext sc = SSLContext.getInstance("TLSv1.2");
+      sc.init(null, trustAllCerts, new java.security.SecureRandom());
+      sslSocketFactory = new SSLConnectionSocketFactory(sc);
+    } catch (NoSuchAlgorithmException e) {
+      e.printStackTrace();
+    } catch (KeyManagementException e) {
+      e.printStackTrace();
+    }
+
     RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(300 * 1000).setSocketTimeout(300 * 1000).build();
-    httpClient = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build();
+    httpClient = HttpClientBuilder.create().setSSLSocketFactory(sslSocketFactory).setDefaultRequestConfig(requestConfig).setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build();
   }
 
   public String getCsrfToken() throws IOException {

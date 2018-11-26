@@ -197,10 +197,6 @@ function initDialogs() {
         mainDialog.dialog( "close");
     });
 
-    $('.menu_add_new_cell').click(function() {
-        addNewCell();
-    });
-
     $('#menu_settings').click(function() {
         mainDialog.dialog( "close");
         fhemConfigDialog.dialog( "open" );
@@ -281,66 +277,6 @@ function addNewClock() {
   allCells.push(clock);
 }
 
-function addNewCell() {
-    var cellUUID = uuidv4();
-    var cellName = "Cell";
-
-    addCell(cellUUID, cellName, true);
-    sendCellToServer(cellUUID, cellName);
-}
-
-function addCell(cellUUID = uuidv4(), cellName = 'Cell', sendToServer = false) {
-
-    var cell = document.createElement("div");
-    cell.setAttribute("class", "yafu-draggable ui-widget-content");
-    cell.setAttribute("ui-uuid", cellUUID);
-
-    var divLeft = document.createElement("div");
-    divLeft.setAttribute("class", "left");
-    var divButtonGear = document.createElement("button");
-    divButtonGear.setAttribute("class", "icon-gear stick-top");
-    divLeft.appendChild(divButtonGear);
-
-    var divMiddle = document.createElement("div");
-    divMiddle.setAttribute("class", "ui-widget-header rounded-corners middle-remain");
-    var header = document.createElement("header");
-    header.innerHTML = cellUUID;
-    divMiddle.appendChild(header);
-
-    var divRight = document.createElement("div");
-    divRight.setAttribute("class", "right");
-    var divButtonTrash = document.createElement("button");
-    divButtonTrash.setAttribute("class", "icon-trash stick-top");
-    divRight.appendChild(divButtonTrash);
-
-    cell.appendChild(divLeft);
-    cell.appendChild(divMiddle);
-    cell.appendChild(divRight);
-
-    var element = document.getElementById("uicontainer");
-    element.appendChild(cell);
-//    document.appendChild(cell);
-
-    $(divButtonGear).button( {
-        icon: "ui-icon-gear",
-        showLabel: false
-    } ).on( "click", function() {
-           $("div[ui-uuid=" + cellUUID + "]").remove();
-           });
-
-    $(divButtonTrash).button( {
-        icon: "ui-icon-trash",
-        showLabel: false
-    } ).on( "click", function() {
-        sendRemoveCellToServer(cellUUID, cellName);
-        $("div[ui-uuid=" + cellUUID + "]").remove();
-    } );
-
-    refreshDraggable(sendToServer);
-
-
-}
-
 function buildModel(modelString) {
   var json = JSON.parse(modelString);
   var firstPage = json.pages[0];
@@ -363,42 +299,27 @@ function buildModel(modelString) {
   }
 }
 
-function sendCellToServer(cellUUID, cellName, position = { left: "0", top: "0"}, size = { width: "200", height: "50"}) {
-/*
-    {
-      "name": "cell 1 in page 2",
-      "id": "e758d716-f7cb-4e73-9c18-15c1c8e3e831",
-      "views": []
-    }
-*/
-
-     var cell = {
-       "name": cellName,
-       "id": cellUUID,
-       "position": position,
-       "size": size,
-       "views": []
-     }
-
+function sendCellToServer(cell) {
      $.ajax({
-             type: "GET",
-             url: "sendCellToServer",
-             data: {
-     			cell: JSON.stringify(cell),
-     			XHR: "1"
-     		},
-     		error: function(data) {
-     		    $.toast({
-                         heading: 'Error',
-                         text: JSON.stringify(cell),
-                         loader: false,
-                         hideAfter: 1000,
-                         showHideTransition: 'slide',
-                         icon: 'error'
-                     });
-     		}
+         type: "GET",
+         url: "sendCellToServer",
+         data: {
+            cell: JSON.stringify(cell),
+            XHR: "1"
+        },
+        contentType: "application/json; charset=utf-8",
+        error: function(data) {
+            $.toast({
+                     heading: 'Error',
+                     text: JSON.stringify(cell),
+                     loader: false,
+                     hideAfter: 1000,
+                     showHideTransition: 'slide',
+                     icon: 'error'
+                 });
+        }
 
-         });
+     });
 }
 
 function sendRemoveCellToServer(cellUUID) {
@@ -441,7 +362,14 @@ function refreshDraggable(sendToServer = false) {
           stack: ".yafu-draggable",
 //          handle: "div,slider",
           stop: function( event, ui ) {
-            sendCellToServer($(this).attr("ui-uuid"), 'Cell', $(this).position(), {width: $(this).width(), height: $(this).height()});
+            var cell = {
+              "name": 'Cell',
+              "id": $(this).attr("ui-uuid"),
+              "position": $(this).position(),
+              "size": {width: $(this).width(), height: $(this).height()},
+              "views": []
+            }
+            sendCellToServer(cell);
           }
       }).resizable({
           minWidth: 200,
@@ -449,7 +377,14 @@ function refreshDraggable(sendToServer = false) {
           grid: [ 10, 10 ],
           helper: "ui-resizable-helper",
           stop: function( event, ui ) {
-            sendCellToServer(ui.element.attr("ui-uuid"), 'Cell', ui.position, ui.size);
+            var cell = {
+              "name": 'Cell',
+              "id": ui.element.attr("ui-uuid"),
+              "position": ui.position,
+              "size": ui.size,
+              "views": []
+            }
+            sendCellToServer(cell);
           }
       });
 
@@ -468,7 +403,14 @@ function refreshDraggable(sendToServer = false) {
       $(this).addClass("rounded-corners");
 
       if (sendToServer) {
-          sendCellToServer($(this).attr("ui-uuid"), 'Cell', $(this).position(), {width: $(this).width(), height: $(this).height()});
+          var cell = {
+            "name": 'Cell',
+            "id": $(this).attr("ui-uuid"),
+            "position": $(this).position(),
+            "size": {width: $(this).width(), height: $(this).height()},
+            "views": []
+          }
+          sendCellToServer(cell);
       }
     });
 }
@@ -507,28 +449,23 @@ $(document).ready(function() {
     autoOpen: false,
   });
 
+  var htmlCanvas = document.getElementById('backgroundCanvas');
+  $( "#backgroundCanvas" ).contextmenu(function() {
+    mainDialog.dialog( "open" );
+  });
+
   document.oncontextmenu=RightMouseDown;
-    document.onmousedown = mouseDown;
+  function RightMouseDown() {
+    return false;
+  }
 
-    function mouseDown(e) {
-        if (e.which==3) {//righClick
-            mainDialog.dialog( "open" );
-        }
-    }
+  initDialogs();
 
-    function RightMouseDown() {
-      return false;
-    }
+  getConfiguration();
 
-    initDialogs();
+  getContentFromServer("getUIContent");
 
-    getConfiguration();
-
-    getContentFromServer("getUIContent");
-
-    playWithCanvas();
-
-
+  playWithCanvas();
 
 });
 

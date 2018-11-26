@@ -37,7 +37,7 @@ class YafuClock {
         if (sendToServer) {
           _this.cell.position = ui.position;
           _this.cell.size = ui.size;
-          _this.sendClockToServer(_this.cell);
+          sendCellToServer(_this.cell);
         }
       },
       drag: function( event, ui ) {
@@ -55,7 +55,7 @@ class YafuClock {
         $("div[ui-uuid=" + _this.cell.id + "]").text(_this.lastReading);
         _this.cell.position = $(this).position();
         _this.cell.size = { width: $(this).width(), height: $(this).height() };
-        _this.sendClockToServer(_this.cell);
+        sendCellToServer(_this.cell);
       }
     }).resizable({
         minWidth: 10,
@@ -69,7 +69,7 @@ class YafuClock {
           $("div[ui-uuid=" + _this.cell.id + "]").text(_this.lastReading);
           _this.cell.position = ui.position;
           _this.cell.size = ui.size;
-          _this.sendClockToServer(_this.cell);
+          sendCellToServer(_this.cell);
 
           stopClock(_this);
           var canvas = document.getElementById(_this.cell.id);
@@ -93,38 +93,6 @@ class YafuClock {
 
   inform(deviceReading, value) {
     // dummy
-  }
-
-  sendClockToServer(cell) {
-    /*
-        {
-          "type": "Clock",
-          "id": "e758d716-f7cb-4e73-9c18-15c1c8e3e831",
-          "position": { left: "0", top: "0"},
-          "size": { width: "200", height: "50"},
-        }
-    */
-
-     $.ajax({
-          type: "GET",
-          url: "sendCellToServer",
-          data: {
-              cell: JSON.stringify(cell),
-              XHR: "1"
-          },
-          contentType: "application/json; charset=utf-8",
-            error: function(data) {
-                $.toast({
-                         heading: 'Error',
-                         text: JSON.stringify(cell),
-                         loader: false,
-                         hideAfter: 1000,
-                         showHideTransition: 'slide',
-                         icon: 'error'
-                     });
-            }
-
-         });
   }
 }
 
