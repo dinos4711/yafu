@@ -27,7 +27,7 @@ class YafuSlider {
           <div id="' + this.customHandleId + '" class="ui-slider-handle yafu-slider-handle"></div>\
         </div>\
         <div label-id="' + this.cell.id + '" class="editable" style="position: absolute; top: 0px; left: 100px">' + this.cell.name + '</div>\
-        <button id="button-close-' + this.cell.id + '" class="hideable" style="position: absolute; top: 0px; right: 10px; width: 18px; height: 18px;">x</button>\
+        <button id="button-close-' + this.cell.id + '" class="hideable" style="position: absolute; top: 0px; right: 0px; width: 18px; height: 18px;">x</button>\
     ';
 
     var cellElement = document.createElement("div");
@@ -171,7 +171,7 @@ class YafuSlider {
       icon: "ui-icon-close",
       showLabel: false
     }).on("click", function() {
-      sendRemoveCellToServer(_this.cell.id, 'dummy');
+      sendRemoveCellToServer(_this.cell.id);
       $("div[draggable-id=" + _this.cell.id + "]").remove();
     });
   }

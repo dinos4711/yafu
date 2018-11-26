@@ -401,18 +401,14 @@ function sendCellToServer(cellUUID, cellName, position = { left: "0", top: "0"},
          });
 }
 
-function sendRemoveCellToServer(cellUUID, cellName) {
+function sendRemoveCellToServer(cellUUID) {
 /*
     {
-      "name": "cell 1 in page 2",
-      "id": "e758d716-f7cb-4e73-9c18-15c1c8e3e831",
-      "views": []
+      "id": "e758d716-f7cb-4e73-9c18-15c1c8e3e831"
     }
 */
      var cell = {
-       "name": cellName,
-       "id": cellUUID,
-       "views": []
+       "id": cellUUID
      }
 
      $.ajax({

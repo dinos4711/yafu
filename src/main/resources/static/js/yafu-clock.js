@@ -83,7 +83,7 @@ class YafuClock {
       icon: "ui-icon-close",
       showLabel: false
     }).on("click", function() {
-      sendRemoveCellToServer(_this.cell.id, 'dummy');
+      sendRemoveCellToServer(_this.cell.id);
       $("div[draggable-id=" + _this.cell.id + "]").remove();
       stopClock(_this);
     });

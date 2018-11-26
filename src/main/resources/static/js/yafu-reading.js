@@ -9,7 +9,8 @@ class YafuReading {
         <div ui-uuid="' + this.cell.id + '" title="' + this.cell.name + ' : ' + this.cell.reading + '" yafu-inform="' + this.cell.device + '-' + this.cell.reading + '">\
           ?\
         </div>\
-        <button id="button-close-' + this.cell.id + '" class="hideable" style="position: absolute; top: 0px; right: 10px; width: 18px; height: 18px;">x</button>\
+        <button id="button-close-' + this.cell.id + '" class="hideable" style="position: absolute; top: 0px; right: -18px; width: 18px; height: 18px;"></button>\
+        <button id="button-settings-' + this.cell.id + '" class="hideable" style="position: absolute; top: 0px; right: 14px; width: 18px; height: 18px;"></button>\
     ';
 
     var cellElement = document.createElement("div");
@@ -83,9 +84,20 @@ class YafuReading {
       icon: "ui-icon-close",
       showLabel: false
     }).on("click", function() {
-      sendRemoveCellToServer(_this.cell.id, 'dummy');
+      sendRemoveCellToServer(_this.cell.id);
       $("div[draggable-id=" + _this.cell.id + "]").remove();
     });
+
+    $("button[id=button-settings-" + this.cell.id + "]").button({
+      icon: "ui-icon-gear",
+      showLabel: false
+    }).on("click", function() {
+      openSettings();
+    });
+  }
+
+  openSettings() {
+
   }
 
   inform(deviceReading, value) {
@@ -135,7 +147,6 @@ class YafuReading {
   }
 
 }
-
 
 class ReadingDialog {
   constructor() {
