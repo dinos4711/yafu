@@ -116,7 +116,7 @@ function initDialogs() {
 
     fhemConfigDialog = $( "#fhemConfigDialog" ).dialog({
       autoOpen: false,
-      height: 300,
+      height: 370,
       width: 500,
       modal: true,
       open: function(event, ui) {
@@ -164,6 +164,8 @@ function initDialogs() {
           config.fhemHost = $( "#fhemHost" ).val();
           config.fhemUser = $( "#fhemUser" ).val();
           config.fhemPassword = $( "#fhemPassword" ).val();
+          config.proxyHost = $( "#proxyHost" ).val();
+          config.proxyPort = $( "#proxyPort" ).val();
           saveConfiguration();
           fhemConfigDialog.dialog( "close" );
           location.reload();
