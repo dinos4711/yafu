@@ -116,7 +116,7 @@ function initDialogs() {
 
     fhemConfigDialog = $( "#fhemConfigDialog" ).dialog({
       autoOpen: false,
-      height: 370,
+      height: 380,
       width: 500,
       modal: true,
       open: function(event, ui) {
@@ -124,8 +124,18 @@ function initDialogs() {
           try {
               if (typeof config.fhemHost != 'undefined') {
                   $( "#fhemHost" ).attr('value', config.fhemHost);
+              }
+              if (typeof config.fhemUser != 'undefined') {
                   $( "#fhemUser" ).attr('value', config.fhemUser);
+              }
+              if (typeof config.fhemPassword != 'undefined') {
                   $( "#fhemPassword" ).attr('value', config.fhemPassword);
+              }
+              if (typeof config.proxyHost != 'undefined') {
+                  $( "#proxyHost" ).attr('value', config.proxyHost);
+              }
+              if (typeof config.proxyPort != 'undefined') {
+                  $( "#proxyPort" ).attr('value', config.proxyPort);
               }
           } catch (e) {
 
@@ -168,7 +178,7 @@ function initDialogs() {
           config.proxyPort = $( "#proxyPort" ).val();
           saveConfiguration();
           fhemConfigDialog.dialog( "close" );
-          location.reload();
+//          location.reload();
         },
         Cancel: function() {
           fhemConfigDialog.dialog( "close" );

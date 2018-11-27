@@ -2,6 +2,7 @@ package de.dinos.fhem.comm;
 
 import de.dinos.fhem.config.Configuration;
 import org.apache.http.Header;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.HttpClient;
@@ -47,17 +48,15 @@ public class FhemClient {
       String fhemHost = config.getString("fhemHost");
       String fhemUser = config.getString("fhemUser");
       String fhemPassword = config.getString("fhemPassword");
-      construct(fhemHost, fhemUser, fhemPassword);
+      String proxyHost = config.getString("proxyHost");
+      String proxyPort = config.getString("proxyPort");
+      construct(fhemHost, fhemUser, fhemPassword, proxyHost, proxyPort);
     } catch (Exception e) {
       e.printStackTrace();
     }
   }
 
-  public FhemClient(String baseURL, String user, String password) {
-    construct(baseURL, user, password);
-  }
-
-  private void construct(String baseURL, String user, String password) {
+  private void construct(String baseURL, String user, String password, String proxyHost, String proxyPort) {
     this.baseURL = baseURL;
     this.user = user;
     this.password = password;
@@ -110,7 +109,12 @@ public class FhemClient {
       e.printStackTrace();
     }
 
-    RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(300 * 1000).setSocketTimeout(300 * 1000).build();
+    RequestConfig.Builder builder = RequestConfig.custom().setConnectTimeout(300 * 1000).setSocketTimeout(300 * 1000);
+    if (proxyHost != null && !proxyHost.isEmpty()) {
+      HttpHost proxy = new HttpHost(proxyHost, Integer.valueOf(proxyPort));
+      builder.setProxy(proxy);
+    }
+    RequestConfig requestConfig = builder.build();
     httpClient = HttpClientBuilder.create().setSSLSocketFactory(sslSocketFactory).setDefaultRequestConfig(requestConfig).setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build();
   }
 
