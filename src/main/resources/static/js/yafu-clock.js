@@ -107,7 +107,7 @@ function startClock(clock) {
     radiusY = radiusY * 0.90;
     clock.radius = Math.min(radiusX, radiusY);
 
-    clock.refreshIntervalId = setInterval(drawClock, 1000, clock);
+    clock.refreshIntervalId = setInterval(drawClock, 100, clock);
 }
 
 function stopClock(clock) {
@@ -161,23 +161,25 @@ function drawTime(ctx, radius){
     var now = new Date();
     var hour = now.getHours();
     var minute = now.getMinutes();
-    var second = now.getSeconds();
+    var second = now.getSeconds() + now.getMilliseconds() / 1000;
+
     //hour
     hour=hour%12;
     hour=(hour*Math.PI/6)+
          (minute*Math.PI/(6*60))+
          (second*Math.PI/(360*60));
-    drawHand(ctx, hour, radius*0.5, radius*0.07);
+    drawHand(ctx, hour, radius*0.5, radius*0.07, "#000000");
     //minute
     minute=(minute*Math.PI/30)+(second*Math.PI/(30*60));
-    drawHand(ctx, minute, radius*0.8, radius*0.07);
+    drawHand(ctx, minute, radius*0.8, radius*0.07, "#000000");
     // second
     second=(second*Math.PI/30);
-    drawHand(ctx, second, radius*0.9, radius*0.02);
+    drawHand(ctx, second, radius*0.9, radius*0.02, "#0000ff");
   }
 
-function drawHand(ctx, pos, length, width) {
+function drawHand(ctx, pos, length, width, color) {
     ctx.beginPath();
+    ctx.strokeStyle=color;
     ctx.lineWidth = width;
     ctx.lineCap = "round";
     ctx.moveTo(0,0);
