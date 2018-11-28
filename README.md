@@ -7,4 +7,4 @@ cd yafu
 
 mvn package 
 
-java -cp target/yafu-1.0-SNAPSHOT.jar
+java -jar target/yafu-1.0-SNAPSHOT.jar
