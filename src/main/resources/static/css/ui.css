@@ -82,6 +82,10 @@ label.small {
   position: absolute;
 }
 
+.gauge-wrapper {
+  position: absolute;
+}
+
 .ui-resizable-helper { border: 2px dotted #00F; }
 
 .grab {

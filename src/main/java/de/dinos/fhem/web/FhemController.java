@@ -152,7 +152,8 @@ public class FhemController {
       }
       return names.toString();
     }
-    if ("getDevicesWithSliders".equals(cmd)) {
+
+    if ("getDevicesWithSliders".equals(cmd) || "getDevicesWithGauges".equals(cmd)) {
       devices = getDevices();
       JSONArray jsonDevices = new JSONArray();
       Map<Device, Map<String, List<String>>> devicesWithSliders = devices.getDevicesWithPossibleSliders();

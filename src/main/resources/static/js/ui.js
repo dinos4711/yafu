@@ -1,9 +1,10 @@
 var config = {};
+var gridSize = 5;
 
 var allCells = new Array();
 var sliderDialog;
 var readingDialog;
-var gridSize = 5;
+var gaugeDialog;
 
 function getConfiguration() {
 
@@ -219,9 +220,19 @@ function initDialogs() {
         addNewClock();
     });
 
+    $('#menu_add_new_gauge').click(function(){
+        mainDialog.dialog( "close");
+        gaugeDialog.open();
+    });
+
     $('#menu_add_new_slider').click(function(){
         mainDialog.dialog( "close");
         sliderDialog.open();
+    });
+
+    $('#menu_add_new_gauge').click(function(){
+        mainDialog.dialog( "close");
+        gaugeDialog.open();
     });
 
     $('#menu_add_new_reading').click(function(){
@@ -303,6 +314,9 @@ function buildModel(modelString) {
       } else if (cell.type == "Clock") {
         var clock = new YafuClock(cell, false);
         allCells.push(clock);
+      } else if (cell.type == "Gauge") {
+        var gauge = new YafuGauge(cell, false);
+        allCells.push(gauge);
       } else {
         addCell(cell.id, cell.name, false);
         cellElement = $("div[ui-uuid=" + cell.id + "]");
@@ -450,16 +464,9 @@ $(document).ready(function() {
      width:"auto"
   });
 
-  sliderDialog = new SliderDialog();
+  sliderDialog  = new SliderDialog();
   readingDialog = new ReadingDialog();
-
-  $( "#newSliderDialog" ).dialog({
-    autoOpen: false,
-  });
-
-  $( "#newReadingDialog" ).dialog({
-    autoOpen: false,
-  });
+  gaugeDialog   = new GaugeDialog();
 
   var htmlCanvas = document.getElementById('backgroundCanvas');
   $( "#backgroundCanvas" ).contextmenu(function() {
