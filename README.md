@@ -20,4 +20,4 @@ java -jar target/yafu-1.0-SNAPSHOT.jar
 ```
 
 ### Run
-Open http://localhost:8090 in the web browser. In the shown dialog enter the URL of your FHEM installation, for example https://my-fhem.org:8083/fhem. Enter the user and password for the basic authentication. The proxy URL and password fields are optional. Press the Test button. If everything is Ok you can continue by pressing Ok.
+The last command starts yafu as a small web server at the machine on which the call was made. Open http://localhost:8090 (or whatever the machine name is on which yafu was started) in the web browser. In the shown dialog enter the URL of your FHEM installation, for example https://my-fhem.org:8083/fhem. Enter the user and password for the basic authentication. The proxy URL and password fields are optional. Press the Test button. If everything is Ok you can continue by pressing Ok.
