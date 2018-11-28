@@ -1,6 +1,5 @@
-# yafu
 
-Yet Another FHEM UI
+# Yet Another FHEM UI
 
 git clone https://github.com/dinos4711/yafu.git 
 
