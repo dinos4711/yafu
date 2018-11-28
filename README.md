@@ -1,4 +1,4 @@
 
 # Yet Another FHEM UI
 
-[Installation instructions](wiki/Installation)
+[Installation instructions](https://github.com/dinos4711/yafu/wiki/Installation)
