@@ -2,7 +2,7 @@
 
 Yet Another FHEM UI
 
-git clone git-yafu-link
+git clone https://github.com/dinos4711/yafu.git 
 
 cd yafu
 
