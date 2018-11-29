@@ -166,22 +166,22 @@ function stopGauge(gauge) {
 }
 
 function drawGauge(ctx, radius) {
-    var grad;
+
+
+    var width = radius * 0.07;
     ctx.beginPath();
-    ctx.arc(0, 0, radius, 0, 2*Math.PI);
-    ctx.fillStyle = 'white';
-    ctx.fill();
-    grad = ctx.createRadialGradient(0,0,radius*0.95, 0,0,radius*1.05);
-    grad.addColorStop(0, '#333');
-    grad.addColorStop(0.5, 'white');
-    grad.addColorStop(1, '#333');
-    ctx.strokeStyle = grad;
-    ctx.lineWidth = radius*0.1;
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(0, 0, radius*0.1, 0, 2*Math.PI);
-    ctx.fillStyle = '#333';
-    ctx.fill();
+    ctx.strokeStyle='#ccc';
+    ctx.lineWidth = width;
+    ctx.lineCap = "butt";
+    for (var i=0; i <= 180; i+=15) {
+      var pos = Math.radians(i);
+      ctx.moveTo(0,0);
+      ctx.rotate(-pos);
+      ctx.moveTo(radius * 0.5, 0);
+      ctx.lineTo(radius * 0.9, 0);
+      ctx.stroke();
+      ctx.rotate(+pos);
+    }
 }
 
 class GaugeDialog {
