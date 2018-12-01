@@ -22,6 +22,10 @@ class YafuSlider {
       }
     }
 
+    for (var i = 0; i < this.values.length; i++) {
+      this.values[i] = toPossibleInteger(this.values[i]);
+    }
+
     var myContent = '\
         <div ui-uuid="' + this.cell.id + '" yafu-inform="' + this.cell.device + '-' + this.cell.setter + '">\
           <div id="' + this.customHandleId + '" class="ui-slider-handle yafu-slider-handle"></div>\
@@ -183,7 +187,7 @@ class YafuSlider {
       for (var v in this.values) {
         if (this.values[v] == value) {
           this.mySlider.slider("value", v);
-          this.handle.text( value );
+          this.handle.text( this.values[v] );
         }
       }
     }

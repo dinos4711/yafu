@@ -121,7 +121,6 @@ function initDialogs() {
       width: 500,
       modal: true,
       open: function(event, ui) {
-          console.log('Opening');
           try {
               if (typeof config.fhemHost != 'undefined') {
                   $( "#fhemHost" ).attr('value', config.fhemHost);
@@ -143,7 +142,7 @@ function initDialogs() {
           }
         },
       close: function(event, ui) {
-          console.log('Closing');
+
         },
       buttons: {
         Test: function() {
@@ -152,7 +151,7 @@ function initDialogs() {
           let fhemUser = $( "#fhemUser" ).val();
           let fhemPassword = $( "#fhemPassword" ).val();
           let headers = new Headers();
-          console.log(fhemUser + ":" + fhemPassword + "@" + fhemHost);
+
           headers.set('Authorization', 'Basic ' + window.btoa(fhemUser + ":" + fhemPassword));
           var url = fhemHost;
           fetch(url, {method:'GET',
@@ -568,7 +567,7 @@ function playWithCanvas() {
       d[2]   = 0;
       d[3]   = 255;
 
-      redraw();
+      //redraw();
     }
 
 }
@@ -619,3 +618,24 @@ Math.radians = function(degrees) {
 Math.degrees = function(radians) {
   return radians * 180 / Math.PI;
 };
+
+Number.prototype.map = function (in_min, in_max, out_min, out_max) {
+  return (this - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
+const mapNumber = (number, in_min, in_max, out_min, out_max) => {
+  return (number - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+};
+
+function toPossibleInteger(value) {
+  var result = parseFloat(value);
+  if (!isNaN(result)) {
+    if (Number.isInteger(result)) {
+      result = Math.floor(result);
+    }
+  } else {
+    result = value;
+  }
+
+  return result;
+}

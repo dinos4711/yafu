@@ -116,6 +116,20 @@ class YafuGauge {
     this.myGauge = $("div[ui-uuid=" + this.cell.id + "]");
 
     getDeviceReading(this.cell.device, this.cell.setter, function(data) {
+      var response = JSON.parse(data);
+      var value = response.Results[0].Readings[_this.cell.setter].Value;
+      var index = -1;
+      for (var i in _this.values) {
+        if (_this.values[i] == value) {
+          index = i;
+        }
+      }
+      if (index != -1) {
+        _this.readingAngle = mapNumber(index, 0, _this.values.length, 0, 240) + 150;
+        _this.readingValue = _this.values[index];
+        drawGauge(_this);
+      }
+
 
     });
 
@@ -128,6 +142,7 @@ class YafuGauge {
       stopGauge(_this);
     });
 
+    this.readingAngle = null;
     startGauge(this);
   }
 
@@ -135,11 +150,16 @@ class YafuGauge {
     var mySetter = this.cell.device + '-' + this.cell.setter;
 
     if (mySetter == deviceSetter) {
-      for (var v in this.values) {
-        if (this.values[v] == value) {
-          this.myGauge.slider("value", v);
-          this.handle.text( value );
+      var index = -1;
+      for (var i in this.values) {
+        if (this.values[i] == value) {
+          index = i;
         }
+      }
+      if (index != -1) {
+        this.readingAngle = mapNumber(index, 0, this.values.length, 0, 240) + 150;
+        this.readingValue = this.values[index];
+        drawGauge(this);
       }
     }
 
@@ -147,42 +167,212 @@ class YafuGauge {
 
 }
 
+function getMousePos(canvas, evt) {
+    var rect = canvas.getBoundingClientRect();
+    return {
+      x: evt.clientX - rect.left,
+      y: evt.clientY - rect.top
+    };
+}
+
 function startGauge(gauge) {
     gauge.canvas = document.getElementById(gauge.cell.id);
-    gauge.ctx = gauge.canvas.getContext("2d");
+    gauge.context = gauge.canvas.getContext("2d");
 
     var radiusX = gauge.canvas.width / 2;
     var radiusY = gauge.canvas.height / 2;
-    gauge.ctx.translate(radiusX, radiusY);
+    gauge.drag = false;
+
+    gauge.canvas.addEventListener ("mouseout", function(evt) {
+        if (config.mode == 'edit') {
+          return;
+        }
+        gauge.helperAngle = null;
+        gauge.drag = false;
+        drawGauge(gauge);
+    }, false);
+
+    gauge.canvas.addEventListener ("mousedown", function(evt) {
+        if (config.mode == 'edit') {
+          return;
+        }
+        gauge.drag = true;
+    }, false);
+
+    gauge.canvas.addEventListener ("mouseup", function(evt) {
+        if (config.mode == 'edit') {
+          return;
+        }
+        if (!gauge.drag) {
+          return;
+        }
+
+        gauge.drag = false;
+
+        mouseToValue(gauge, evt);
+        drawGauge(gauge);
+
+        f = gauge.helperAngle;
+
+        var angle = f + 150;
+        if (f <= 30) {
+          angle += 360;
+        }
+        var index = Math.round(mapNumber(angle, 300, 540, 0, gauge.values.length - 1));
+        gauge.helperValue = gauge.values[index];
+
+        var device = gauge.cell.device;
+        var setter = gauge.cell.setter;
+        var value = gauge.helperValue;
+        var cmd = 'set ' + device + ' ' + setter + ' ' + value;
+        $.toast({
+            heading: 'Send command',
+            text: cmd,
+            loader: false,
+            hideAfter: 2000,
+            showHideTransition: 'slide',
+            icon: 'info'
+        });
+
+        var url = config.fhemHost + '?XHR=1&cmd=' + cmd + '&fwcsrf=' + fhemToken;
+        let username = config.fhemUser;
+        let password = config.fhemPassword;
+
+        let headers = new Headers();
+        headers.set('Authorization', 'Basic ' + window.btoa(username + ":" + password));
+        fetch(url, {method:'POST',
+               headers: headers,
+              }).then(function(response) {
+                console.log("Response:");
+                console.log(response);
+              });
+
+    }, false);
+
+    gauge.canvas.addEventListener('mousemove', function(evt) {
+        if (config.mode == 'edit') {
+          return;
+        }
+
+        if (!gauge.drag) {
+          return;
+        }
+
+        mouseToValue(gauge, evt);
+        drawGauge(gauge);
+
+      }, false);
+
+    gauge.context.translate(radiusX, radiusY);
     radiusX = radiusX * 0.90;
     radiusY = radiusY * 0.90;
     gauge.radius = Math.min(radiusX, radiusY);
 
-    drawGauge(gauge.ctx, gauge.radius);
+    drawGauge(gauge);
+}
+
+function mouseToValue(gauge, evt) {
+  var mousePos = getMousePos(gauge.canvas, evt);
+  var xRelCenter =   (mousePos.x - gauge.canvas.width  / 2);
+  var yRelCenter = - (mousePos.y - gauge.canvas.height / 2);
+  var f = Math.degrees(Math.atan((yRelCenter) / (xRelCenter)));
+
+  var signX = Math.sign(xRelCenter);
+  var signY = Math.sign(yRelCenter);
+  if (signX == -1) {
+    f = 180 + f;
+  } else if (signY == -1) {
+    f = 360 + f;
+  }
+
+  f = 360 - f;
+
+  if (f > 30 && f < 150) {
+    var diff1 = f - 30;
+    var diff2 = 150 - f;
+    if (diff1 > diff2) {
+      f = 150;
+    } else {
+      f = 30;
+    }
+  }
+
+  if (f <= 30 || f >= 150) {
+      gauge.helperAngle = f;
+
+      var angle = f + 150;
+      if (f <= 30) {
+        angle += 360;
+      }
+      var index = Math.round(mapNumber(angle, 300, 540, 0, gauge.values.length - 1));
+      gauge.helperValue = gauge.values[index];
+  }
+
 }
 
 function stopGauge(gauge) {
 
 }
 
-function drawGauge(ctx, radius) {
+function drawGauge(gauge) {
 
+    var width = gauge.radius * 0.03;
 
-    var width = radius * 0.07;
-    ctx.beginPath();
-    ctx.strokeStyle='#ccc';
-    ctx.lineWidth = width;
-    ctx.lineCap = "butt";
-    for (var i=0; i <= 180; i+=15) {
-      var pos = Math.radians(i);
-      ctx.moveTo(0,0);
-      ctx.rotate(-pos);
-      ctx.moveTo(radius * 0.5, 0);
-      ctx.lineTo(radius * 0.9, 0);
-      ctx.stroke();
-      ctx.rotate(+pos);
+    // Store the current transformation matrix
+    gauge.context.save();
+    // Use the identity matrix while clearing the canvas
+    gauge.context.setTransform(1, 0, 0, 1, 0, 0);
+    gauge.context.clearRect(0, 0, gauge.canvas.width, gauge.canvas.height);
+    // Restore the transform
+    gauge.context.restore();
+
+    gauge.context.strokeStyle='#666666';
+    gauge.context.lineWidth = width;
+    gauge.context.lineCap = "butt";
+    for (var i=0; i < gauge.values.length; i++) {
+      var angle = mapNumber(i, 0, gauge.values.length - 1, -30, 210);
+      var pos = Math.radians(angle);
+      gauge.context.beginPath();
+      gauge.context.moveTo(0,0);
+      gauge.context.rotate(-pos);
+      gauge.context.moveTo(gauge.radius * 0.6, 0);
+      gauge.context.lineTo(gauge.radius * 0.9, 0);
+      gauge.context.stroke();
+      gauge.context.rotate(+pos);
     }
+
+    if (typeof gauge.readingAngle != undefined && gauge.readingAngle != null && !gauge.drag) {
+      drawHandAndValue(gauge, gauge.readingAngle, toPossibleInteger(gauge.readingValue), '#F59B00', width);
+    }
+
+    if (gauge.helperAngle != null && gauge.drag) {
+      drawHandAndValue(gauge, gauge.helperAngle, toPossibleInteger(gauge.helperValue), '#ffffff', width);
+    }
+
 }
+
+function drawHandAndValue(gauge, angle, value, color, lineWidth) {
+  var pos = Math.radians(angle);
+  gauge.context.beginPath();
+  gauge.context.strokeStyle = color;
+  gauge.context.lineWidth = lineWidth;
+  gauge.context.lineCap = "round";
+  gauge.context.moveTo(0,0);
+  gauge.context.rotate(pos);
+  gauge.context.moveTo(gauge.radius * 0.6, 0);
+  gauge.context.lineTo(gauge.radius * 0.9, 0);
+  gauge.context.stroke();
+  gauge.context.rotate(-pos);
+
+  gauge.context.beginPath();
+  gauge.context.fillStyle = color;
+  gauge.context.textAlign = "center";
+  gauge.context.textBaseline="middle";
+  gauge.context.font = "" + (gauge.radius / 5) + "px Arial";
+
+  gauge.context.fillText(value, 0, 0);
+}
+
 
 class GaugeDialog {
 

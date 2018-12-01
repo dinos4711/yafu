@@ -81,8 +81,8 @@ class YafuReading {
     getDeviceReading(this.cell.device, this.cell.reading, function(data) {
       var response = JSON.parse(data);
       var value = response.Results[0].Readings[_this.cell.reading].Value;
-      _this.lastReading = value;
-      $("div[ui-uuid=" + _this.cell.id + "]").text(value);
+      _this.lastReading = toPossibleInteger(value);
+      $("div[ui-uuid=" + _this.cell.id + "]").text(_this.lastReading);
     });
 
     $("button[id=button-close-" + this.cell.id + "]").button({
@@ -103,8 +103,8 @@ class YafuReading {
     var myReading = this.cell.device + '-' + this.cell.reading;
 
     if (myReading == deviceReading) {
-      $("div[ui-uuid=" + this.cell.id + "]").text(value);
-      this.lastReading = value;
+      this.lastReading = toPossibleInteger(value);
+      $("div[ui-uuid=" + this.cell.id + "]").text(this.lastReading);
     }
 
   }

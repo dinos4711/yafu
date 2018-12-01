@@ -98,11 +98,11 @@ class YafuClock {
 
 function startClock(clock) {
     clock.canvas = document.getElementById(clock.cell.id);
-    clock.ctx = clock.canvas.getContext("2d");
+    clock.context = clock.canvas.getContext("2d");
 
     var radiusX = clock.canvas.width / 2;
     var radiusY = clock.canvas.height / 2;
-    clock.ctx.translate(radiusX, radiusY);
+    clock.context.translate(radiusX, radiusY);
     radiusX = radiusX * 0.90;
     radiusY = radiusY * 0.90;
     clock.radius = Math.min(radiusX, radiusY);
@@ -115,49 +115,49 @@ function stopClock(clock) {
 }
 
 function drawClock(clock) {
-    drawFace(clock.ctx, clock.radius);
-    drawNumbers(clock.ctx, clock.radius);
-    drawTime(clock.ctx, clock.radius);
+    drawFace(clock.context, clock.radius);
+    drawNumbers(clock.context, clock.radius);
+    drawTime(clock.context, clock.radius);
 }
 
-function drawFace(ctx, radius) {
+function drawFace(context, radius) {
     var grad;
-    ctx.beginPath();
-    ctx.arc(0, 0, radius, 0, 2*Math.PI);
-    ctx.fillStyle = 'white';
-    ctx.fill();
-    grad = ctx.createRadialGradient(0,0,radius*0.95, 0,0,radius*1.05);
+    context.beginPath();
+    context.arc(0, 0, radius, 0, 2*Math.PI);
+    context.fillStyle = 'white';
+    context.fill();
+    grad = context.createRadialGradient(0,0,radius*0.95, 0,0,radius*1.05);
     grad.addColorStop(0, '#333');
     grad.addColorStop(0.5, 'white');
     grad.addColorStop(1, '#333');
-    ctx.strokeStyle = grad;
-    ctx.lineWidth = radius*0.1;
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(0, 0, radius*0.1, 0, 2*Math.PI);
-    ctx.fillStyle = '#333';
-    ctx.fill();
+    context.strokeStyle = grad;
+    context.lineWidth = radius*0.1;
+    context.stroke();
+    context.beginPath();
+    context.arc(0, 0, radius*0.1, 0, 2*Math.PI);
+    context.fillStyle = '#333';
+    context.fill();
   }
 
-function drawNumbers(ctx, radius) {
+function drawNumbers(context, radius) {
     var ang;
     var num;
-    ctx.font = radius*0.15 + "px arial";
-    ctx.textBaseline="middle";
-    ctx.textAlign="center";
+    context.font = radius*0.15 + "px arial";
+    context.textBaseline="middle";
+    context.textAlign="center";
     for(num = 1; num < 13; num++){
       ang = num * Math.PI / 6;
-      ctx.rotate(ang);
-      ctx.translate(0, -radius*0.85);
-      ctx.rotate(-ang);
-      ctx.fillText(num.toString(), 0, 0);
-      ctx.rotate(ang);
-      ctx.translate(0, radius*0.85);
-      ctx.rotate(-ang);
+      context.rotate(ang);
+      context.translate(0, -radius*0.85);
+      context.rotate(-ang);
+      context.fillText(num.toString(), 0, 0);
+      context.rotate(ang);
+      context.translate(0, radius*0.85);
+      context.rotate(-ang);
     }
   }
 
-function drawTime(ctx, radius){
+function drawTime(context, radius){
     var now = new Date();
     var hour = now.getHours();
     var minute = now.getMinutes();
@@ -168,23 +168,23 @@ function drawTime(ctx, radius){
     hour=(hour*Math.PI/6)+
          (minute*Math.PI/(6*60))+
          (second*Math.PI/(360*60));
-    drawHand(ctx, hour, radius*0.5, radius*0.07, "#000000");
+    drawHand(context, hour, radius*0.5, radius*0.07, "#000000");
     //minute
     minute=(minute*Math.PI/30)+(second*Math.PI/(30*60));
-    drawHand(ctx, minute, radius*0.8, radius*0.07, "#000000");
+    drawHand(context, minute, radius*0.8, radius*0.07, "#000000");
     // second
     second=(second*Math.PI/30);
-    drawHand(ctx, second, radius*0.9, radius*0.02, "#0000ff");
+    drawHand(context, second, radius*0.9, radius*0.02, "#0000ff");
   }
 
-function drawHand(ctx, pos, length, width, color) {
-    ctx.beginPath();
-    ctx.strokeStyle=color;
-    ctx.lineWidth = width;
-    ctx.lineCap = "round";
-    ctx.moveTo(0,0);
-    ctx.rotate(pos);
-    ctx.lineTo(0, -length);
-    ctx.stroke();
-    ctx.rotate(-pos);
+function drawHand(context, pos, length, width, color) {
+    context.beginPath();
+    context.strokeStyle=color;
+    context.lineWidth = width;
+    context.lineCap = "round";
+    context.moveTo(0,0);
+    context.rotate(pos);
+    context.lineTo(0, -length);
+    context.stroke();
+    context.rotate(-pos);
   }
