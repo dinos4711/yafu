@@ -125,7 +125,7 @@ class YafuGauge {
         }
       }
       if (index != -1) {
-        _this.readingAngle = mapNumber(index, 0, _this.values.length, 0, 240) + 150;
+        _this.readingAngle = mapNumber(index, 0, _this.values.length - 1, 0, 240) + 150;
         _this.readingValue = _this.values[index];
         drawGauge(_this);
       }
@@ -157,7 +157,7 @@ class YafuGauge {
         }
       }
       if (index != -1) {
-        this.readingAngle = mapNumber(index, 0, this.values.length, 0, 240) + 150;
+        this.readingAngle = mapNumber(index, 0, this.values.length - 1, 0, 240) + 150;
         this.readingValue = this.values[index];
         drawGauge(this);
       }
@@ -332,13 +332,8 @@ function drawGauge(gauge) {
     for (var i=0; i < gauge.values.length; i++) {
       var angle = mapNumber(i, 0, gauge.values.length - 1, -30, 210);
       var pos = Math.radians(angle);
-      gauge.context.beginPath();
-      gauge.context.moveTo(0,0);
-      gauge.context.rotate(-pos);
-      gauge.context.moveTo(gauge.radius * 0.6, 0);
-      gauge.context.lineTo(gauge.radius * 0.9, 0);
-      gauge.context.stroke();
-      gauge.context.rotate(+pos);
+
+      drawSmallPiePiece(gauge.context, pos, gauge.radius * 0.6, gauge.radius * 0.9, '#666666', 2);
     }
 
     if (typeof gauge.readingAngle != undefined && gauge.readingAngle != null && !gauge.drag) {
@@ -351,26 +346,37 @@ function drawGauge(gauge) {
 
 }
 
+function drawSmallPiePiece(context, angle, minRadius, maxRadius, color, th) {
+    context.save();
+
+    context.beginPath();
+    context.rotate(-angle);
+    context.strokeStyle=color;
+    context.fillStyle=color;
+    context.lineWidth = 1;
+    context.rotate(-Math.radians(th / 2));
+    context.moveTo(minRadius, 0);
+    context.lineTo(maxRadius, 0);
+    context.arc(0, 0, maxRadius, 0, Math.radians(th));
+    context.rotate(Math.radians(th));
+    context.lineTo(minRadius, 0);
+    context.fill();
+
+    context.restore();
+}
+
 function drawHandAndValue(gauge, angle, value, color, lineWidth) {
-  var pos = Math.radians(angle);
-  gauge.context.beginPath();
-  gauge.context.strokeStyle = color;
-  gauge.context.lineWidth = lineWidth;
-  gauge.context.lineCap = "round";
-  gauge.context.moveTo(0,0);
-  gauge.context.rotate(pos);
-  gauge.context.moveTo(gauge.radius * 0.6, 0);
-  gauge.context.lineTo(gauge.radius * 0.9, 0);
-  gauge.context.stroke();
-  gauge.context.rotate(-pos);
+    var pos = Math.radians(angle);
 
-  gauge.context.beginPath();
-  gauge.context.fillStyle = color;
-  gauge.context.textAlign = "center";
-  gauge.context.textBaseline="middle";
-  gauge.context.font = "" + (gauge.radius / 5) + "px Arial";
+    drawSmallPiePiece(gauge.context, -pos, gauge.radius * 0.59, gauge.radius * 0.91, color, 3);
 
-  gauge.context.fillText(value, 0, 0);
+    gauge.context.beginPath();
+    gauge.context.fillStyle = color;
+    gauge.context.textAlign = "center";
+    gauge.context.textBaseline="middle";
+    gauge.context.font = "" + (gauge.radius / 5) + "px Arial";
+
+    gauge.context.fillText(value, 0, 0);
 }
 
 

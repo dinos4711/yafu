@@ -507,7 +507,13 @@ function playWithCanvas() {
     }
 
     function redraw() {
+      // Store the current transformation matrix
+      context.save();
+      // Use the identity matrix while clearing the canvas
+      context.setTransform(1, 0, 0, 1, 0, 0);
       context.clearRect(0, 0, htmlCanvas.width, htmlCanvas.height);
+      // Restore the transform
+      context.restore();
 
       context.fillStyle="#007700";
       context.fillRect(posX, posY, 1, 1);
