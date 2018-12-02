@@ -1,5 +1,5 @@
 //
-// Yet Another FHEM UI - Sliders
+// Yet Another FHEM UI - Slider
 //
 
 class YafuSlider {
@@ -73,7 +73,7 @@ class YafuSlider {
         var myLeft = Math.round(parseFloat($(this).position().left) / gridSize) * gridSize;
         $(this).css({top: myTop, left: myLeft});
 
-        $("div[label-id=" + _this.cell.id + "]").text(myLeft + ' , ' + myTop);
+        $("#infoBox").text(myLeft + ' , ' + myTop);
       },
       stop: function( event, ui ) {
         var myTop  = Math.round(parseFloat($(this).position().top)  / gridSize) * gridSize;
@@ -81,6 +81,7 @@ class YafuSlider {
         $(this).css({top: myTop, left: myLeft});
 
         $("div[label-id=" + _this.cell.id + "]").text(_this.cell.name);
+        $("#infoBox").text("");
         _this.cell.position = $(this).position();
         _this.cell.size = { width: $(this).width(), height: $(this).height() };
         _this.cell.values = _this.values.join();
@@ -89,10 +90,11 @@ class YafuSlider {
     }).resizable({
         grid: [ gridSize, gridSize ],
         resize: function( event, ui ) {
-          $("div[label-id=" + _this.cell.id + "]").text(ui.size.width + ' x ' + ui.size.height);
+          $("#infoBox").text(ui.size.width + ' x ' + ui.size.height);
         },
         stop: function( event, ui ) {
           $("div[label-id=" + _this.cell.id + "]").text(_this.cell.name);
+          $("#infoBox").text("");
           _this.cell.position = ui.position;
           _this.cell.size = ui.size;
           _this.cell.values = _this.values.join();
@@ -298,7 +300,8 @@ class SliderDialog {
         name: this.selectedDeviceName,
         device: this.selectedDevice,
         setter: this.selectedSetter,
-        values: valuesString
+        values: valuesString,
+        position: { left: mainDialog.mouse.x, top: mainDialog.mouse.y }
     };
     var slider = new YafuSlider(cell, true);
     allCells.push(slider);

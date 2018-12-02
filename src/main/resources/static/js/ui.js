@@ -178,7 +178,6 @@ function initDialogs() {
           config.proxyPort = $( "#proxyPort" ).val();
           saveConfiguration();
           fhemConfigDialog.dialog( "close" );
-//          location.reload();
         },
         Cancel: function() {
           fhemConfigDialog.dialog( "close" );
@@ -193,7 +192,10 @@ function initDialogs() {
 
     mainDialog = $( "#mainDialog" ).dialog({
       autoOpen: false,
+      modal: true
     });
+    $("#mainDialog").css('z-index', 9999);
+
     $( "#mainMenu" ).menu();
 
     $('#menu_mode').click(function() {
@@ -243,6 +245,14 @@ function initDialogs() {
         icon: "ui-icon-close",
         showLabel: false
     } );
+
+    readableContextMenuDialog = $( "#readableContextMenuDialog" ).dialog({
+      autoOpen: false,
+      modal: true
+    });
+    $("#readableContextMenuDialog").css('z-index', 9999);
+    $( "#readableContextMenu" ).menu();
+
 };
 
 function getContentFromServer(cmdline) {
@@ -293,6 +303,7 @@ function addNewClock() {
     type: "Clock",
     name: "Clock",
     id: uuidv4(),
+    position: { left: mainDialog.mouse.x, top: mainDialog.mouse.y }
   };
 
   var clock = new YafuClock(cell, true);
@@ -385,7 +396,6 @@ function refreshDraggable(sendToServer = false) {
           snap: true,
           grid: [ 10, 10 ],
           stack: ".yafu-draggable",
-//          handle: "div,slider",
           stop: function( event, ui ) {
             var cell = {
               "name": 'Cell',
@@ -416,13 +426,13 @@ function refreshDraggable(sendToServer = false) {
       $(this).click(function() {
         var topZ = 0;
         $('.yafu-draggable').each(function(){
-          var thisZ = parseInt($(this).css('zIndex'), 10);
+          var thisZ = parseInt($(this).css('z-index'), 10);
           if (thisZ > topZ){
             topZ = thisZ;
           }
         });
         console.log(topZ);
-        $(this).css('zIndex', topZ+1);
+        $(this).css('z-index', topZ+1);
       });
 
       $(this).addClass("rounded-corners");
@@ -443,8 +453,6 @@ function refreshDraggable(sendToServer = false) {
 
 // prepare the form when the DOM is ready
 $(document).ready(function() {
-
-  $( document ).tooltip();
 
   // Setup the ajax indicator
   $('body').append('<div id="ajaxBusy"><p><img src="images/ajax-loader.gif"></p></div>');
@@ -468,7 +476,9 @@ $(document).ready(function() {
   gaugeDialog   = new GaugeDialog();
 
   var htmlCanvas = document.getElementById('backgroundCanvas');
-  $( "#backgroundCanvas" ).contextmenu(function() {
+  $( "#backgroundCanvas" ).contextmenu(function(evt) {
+    mainDialog.mouse = {"x": evt.originalEvent.clientX, "y": evt.originalEvent.clientY};
+    $("#mainDialog").css('z-index', 9999);
     mainDialog.dialog( "open" );
   });
 
@@ -488,7 +498,6 @@ $(document).ready(function() {
 });
 
 function playWithCanvas() {
-    var pixel;
     var posX;
     var posY;
     var dirX;
@@ -517,7 +526,6 @@ function playWithCanvas() {
 
       context.fillStyle="#007700";
       context.fillRect(posX, posY, 1, 1);
-      //context.putImageData( pixel, posX, posY );
 
       check();
       setTimeout(redraw, 30);
@@ -565,13 +573,6 @@ function playWithCanvas() {
       dirY = Math.floor(Math.random() * 5) - 2;
       maxSteps = Math.floor(Math.random() * 50) + 10;
       step = 1;
-
-      pixel = context.createImageData(1,1); // only do this once per page
-      var d  = pixel.data;                        // only do this once per page
-      d[0]   = 0;
-      d[1]   = 127;
-      d[2]   = 0;
-      d[3]   = 255;
 
       //redraw();
     }

@@ -72,6 +72,13 @@ label.small {
   position: absolute;
 }
 
+.infoBox {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  display:flex;
+}
+
 .clock-wrapper {
   position: absolute;
 }

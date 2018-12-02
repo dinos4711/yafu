@@ -1,3 +1,7 @@
+//
+// Yet Another FHEM UI - Clock
+//
+
 class YafuClock {
   constructor(cell, sendToServer = false) {
     var _this = this;
@@ -45,7 +49,7 @@ class YafuClock {
         var myLeft = Math.round(parseFloat($(this).position().left) / gridSize) * gridSize;
         $(this).css({top: myTop, left: myLeft});
 
-        $("div[ui-uuid=" + _this.cell.id + "]").text(myLeft + ' , ' + myTop);
+        $("#infoBox").text(myLeft + ' , ' + myTop);
       },
       stop: function( event, ui ) {
         var myTop  = Math.round(parseFloat($(this).position().top)  / gridSize) * gridSize;
@@ -53,6 +57,7 @@ class YafuClock {
         $(this).css({top: myTop, left: myLeft});
 
         $("div[ui-uuid=" + _this.cell.id + "]").text(_this.lastReading);
+        $("#infoBox").text("");
         _this.cell.position = $(this).position();
         _this.cell.size = { width: $(this).width(), height: $(this).height() };
         sendCellToServer(_this.cell);
@@ -63,10 +68,11 @@ class YafuClock {
         grid: [ gridSize, gridSize ],
         helper: "ui-resizable-helper",
         resize: function( event, ui ) {
-          $("div[ui-uuid=" + _this.cell.id + "]").text(ui.size.width + ' x ' + ui.size.height);
+          $("#infoBox").text(ui.size.width + ' x ' + ui.size.height);
         },
         stop: function( event, ui ) {
           $("div[ui-uuid=" + _this.cell.id + "]").text(_this.lastReading);
+          $("#infoBox").text("");
           _this.cell.position = ui.position;
           _this.cell.size = ui.size;
           sendCellToServer(_this.cell);

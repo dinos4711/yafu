@@ -1,5 +1,5 @@
 //
-// Yet Another FHEM UI - Sliders
+// Yet Another FHEM UI - Gauge
 //
 
 class YafuGauge {
@@ -25,13 +25,12 @@ class YafuGauge {
     }
 
     var onlyIntegers = typeof this.cell.onlyIntegers != 'undefined' && this.cell.onlyIntegers;
-    this.myValuesMap = new Map();
     for (var i = 0; i < this.values.length; i++) {
         var active = false;
         if (!onlyIntegers || isNaN(parseFloat(this.values[i])) || (onlyIntegers && Number.isInteger(this.values[i]))) {
             active = true;
         }
-        this.myValuesMap.set(this.values[i], active);
+        this.values[i] = { "value": this.values[i], "active": active};
     }
 
     var myContent = '\
@@ -73,7 +72,6 @@ class YafuGauge {
         if (sendToServer) {
           _this.cell.position = ui.position;
           _this.cell.size = ui.size;
-          _this.cell.values = _this.values.join();
           sendCellToServer(_this.cell);
         }
       },
@@ -82,7 +80,7 @@ class YafuGauge {
         var myLeft = Math.round(parseFloat($(this).position().left) / gridSize) * gridSize;
         $(this).css({top: myTop, left: myLeft});
 
-        $("div[label-id=" + _this.cell.id + "]").text(myLeft + ' , ' + myTop);
+        $("#infoBox").text(myLeft + ' , ' + myTop);
       },
       stop: function( event, ui ) {
         var myTop  = Math.round(parseFloat($(this).position().top)  / gridSize) * gridSize;
@@ -90,9 +88,9 @@ class YafuGauge {
         $(this).css({top: myTop, left: myLeft});
 
         $("div[label-id=" + _this.cell.id + "]").text(_this.cell.name);
+        $("#infoBox").text("");
         _this.cell.position = $(this).position();
         _this.cell.size = { width: $(this).width(), height: $(this).height() };
-        _this.cell.values = _this.values.join();
         sendCellToServer(_this.cell);
       }
     }).resizable({
@@ -101,13 +99,13 @@ class YafuGauge {
         grid: [ gridSize, gridSize ],
         helper: "ui-resizable-helper",
         resize: function( event, ui ) {
-          $("div[label-id=" + _this.cell.id + "]").text(ui.size.width + ' x ' + ui.size.height);
+          $("#infoBox").text(ui.size.width + ' x ' + ui.size.height);
         },
         stop: function( event, ui ) {
           $("div[label-id=" + _this.cell.id + "]").text(_this.cell.name);
+          $("#infoBox").text("");
           _this.cell.position = ui.position;
           _this.cell.size = ui.size;
-          _this.cell.values = _this.values.join();
           sendCellToServer(_this.cell);
 
           stopGauge(_this);
@@ -134,13 +132,13 @@ class YafuGauge {
       var value = response.Results[0].Readings[_this.cell.setter].Value;
       var index = -1;
       for (var i in _this.values) {
-        if (_this.values[i] == value) {
+        if (_this.values[i].value == value) {
           index = i;
         }
       }
       if (index != -1) {
         _this.readingAngle = mapNumber(index, 0, _this.values.length - 1, 0, 240) + 150;
-        _this.readingValue = _this.values[index];
+        _this.readingValue = _this.values[index].value;
       } else {
         _this.readingAngle = 150;
         _this.readingValue = toPossibleInteger(value);
@@ -162,23 +160,19 @@ class YafuGauge {
     startGauge(this);
   }
 
-  values() {
-    return Array.from(myValuesMap.keys());
-  }
-
   inform(deviceSetter, value) {
     var mySetter = this.cell.device + '-' + this.cell.setter;
 
     if (mySetter == deviceSetter) {
       var index = -1;
       for (var i in this.values) {
-        if (this.values[i] == value) {
+        if (this.values[i].value == value) {
           index = i;
         }
       }
       if (index != -1) {
         this.readingAngle = mapNumber(index, 0, this.values.length - 1, 0, 240) + 150;
-        this.readingValue = this.values[index];
+        this.readingValue = this.values[index].value;
       } else {
         this.readingAngle = 150;
         this.readingValue = toPossibleInteger(value);
@@ -315,19 +309,19 @@ function mouseToValue(gauge, evt) {
         valueAngle += 360;
       }
       var index = Math.round(mapNumber(valueAngle, 300, 540, 0, gauge.values.length - 1));
-      gauge.helperValue = gauge.values[index];
+      gauge.helperValue = gauge.values[index].value;
 
-      if (!gauge.myValuesMap.get(gauge.values[index])) {
+      if (!gauge.values[index].active) {
         var index1 = index;
         for (var i = index-1; i > 0; i--) {
-          if (gauge.myValuesMap.get(gauge.values[i])) {
+          if (gauge.values[i].active) {
             index1 = i;
             break;
           }
         }
         var index2 = index;
         for (var i = index+1; i < gauge.values.length; i++) {
-          if (gauge.myValuesMap.get(gauge.values[i])) {
+          if (gauge.values[i].active) {
             index2 = i;
             break;
           }
@@ -364,10 +358,8 @@ function mouseToValue(gauge, evt) {
           }
         }
 
-
-
         if (foundIndex != -1) {
-          gauge.helperValue = gauge.values[foundIndex];
+          gauge.helperValue = gauge.values[foundIndex].value;
         }
 
       } else {
@@ -401,7 +393,7 @@ function drawGauge(gauge) {
       var angle = mapNumber(i, 0, gauge.values.length - 1, 150, 390);
       var pos = Math.radians(angle);
 
-      if (gauge.myValuesMap.get(gauge.values[i])) {
+      if (gauge.values[i].active) {
         drawSmallPiePiece(gauge.context, pos, gauge.radius * 0.6, gauge.radius * 0.9, '#666666', 240 / (gauge.values.length * 2 - 1));
       }
 
@@ -562,7 +554,8 @@ class GaugeDialog {
         device: this.selectedDevice,
         setter: this.selectedSetter,
         values: valuesString,
-        onlyIntegers: onlyIntegers
+        onlyIntegers: onlyIntegers,
+        position: { left: mainDialog.mouse.x, top: mainDialog.mouse.y }
     };
     var gauge = new YafuGauge(cell, true);
     allCells.push(gauge);

@@ -1,3 +1,6 @@
+//
+// Yet Another FHEM UI - Reading
+//
 
 class YafuReading {
   constructor(cell, sendToServer = false) {
@@ -9,7 +12,6 @@ class YafuReading {
         <div ui-uuid="' + this.cell.id + '" title="' + this.cell.name + ' : ' + this.cell.reading + '" yafu-inform="' + this.cell.device + '-' + this.cell.reading + '">\
           ?\
         </div>\
-        <button id="button-close-' + this.cell.id + '" class="hideable" style="position: absolute; top: -10px; right: -18px; width: 18px; height: 18px;"></button>\
     ';
 
     var cellElement = document.createElement("div");
@@ -19,12 +21,6 @@ class YafuReading {
 
     document.getElementById("uicontainer").appendChild(cellElement);
 
-    $( "div[draggable-id=" + this.cell.id + "]" ).contextmenu(function() {
-      if (config.mode == 'edit') {
-        alert( "Handler for .contextmenu() called." );
-      }
-    });
-
     if (typeof this.cell.position == 'undefined') {
       this.cell.position = {top: 50, left: 10};
     }
@@ -32,6 +28,20 @@ class YafuReading {
       this.cell.size = {width: 400, height: 20};
     }
     $("div[draggable-id=" + this.cell.id + "]").css({top: this.cell.position.top, left: this.cell.position.left, width: this.cell.size.width, height: this.cell.size.height});
+    $("div[draggable-id=" + this.cell.id + "]").css('z-index', 100);
+
+    $("div[draggable-id=" + this.cell.id + "]").contextmenu(function() {
+        if (config.mode == 'edit') {
+            $('#menu_readableDelete').click(function() {
+                readableContextMenuDialog.dialog( "close");
+                sendRemoveCellToServer(_this.cell.id);
+                $("div[draggable-id=" + _this.cell.id + "]").remove();
+            });
+            readableContextMenuDialog.dialog( "open");
+        }
+    });
+
+    $("div[ui-uuid=" + _this.cell.id + "]").tooltip();
 
     $("div[draggable-id=" + this.cell.id + "]").draggable({
       containment: "document",
@@ -46,19 +56,24 @@ class YafuReading {
           sendCellToServer(_this.cell);
         }
       },
+      start: function( event, ui ) {
+        $("div[ui-uuid=" + _this.cell.id + "]").tooltip('destroy');
+      },
       drag: function( event, ui ) {
         var myTop  = Math.round(parseFloat($(this).position().top)  / gridSize) * gridSize;
         var myLeft = Math.round(parseFloat($(this).position().left) / gridSize) * gridSize;
         $(this).css({top: myTop, left: myLeft});
 
-        $("div[ui-uuid=" + _this.cell.id + "]").text(myLeft + ' , ' + myTop);
+        $("#infoBox").text(myLeft + ' , ' + myTop);
       },
       stop: function( event, ui ) {
+        $("div[ui-uuid=" + _this.cell.id + "]").tooltip();
         var myTop  = Math.round(parseFloat($(this).position().top)  / gridSize) * gridSize;
         var myLeft = Math.round(parseFloat($(this).position().left) / gridSize) * gridSize;
         $(this).css({top: myTop, left: myLeft});
 
         $("div[ui-uuid=" + _this.cell.id + "]").text(_this.lastReading);
+        $("#infoBox").text("");
         _this.cell.position = $(this).position();
         _this.cell.size = { width: $(this).width(), height: $(this).height() };
         sendCellToServer(_this.cell);
@@ -68,10 +83,11 @@ class YafuReading {
         minHeight: 10,
         grid: [ gridSize, gridSize ],
         resize: function( event, ui ) {
-          $("div[ui-uuid=" + _this.cell.id + "]").text(ui.size.width + ' x ' + ui.size.height);
+          $("#infoBox").text(ui.size.width + ' x ' + ui.size.height);
         },
         stop: function( event, ui ) {
           $("div[ui-uuid=" + _this.cell.id + "]").text(_this.lastReading);
+          $("#infoBox").text("");
           _this.cell.position = ui.position;
           _this.cell.size = ui.size;
           sendCellToServer(_this.cell);
@@ -83,14 +99,6 @@ class YafuReading {
       var value = response.Results[0].Readings[_this.cell.reading].Value;
       _this.lastReading = toPossibleInteger(value);
       $("div[ui-uuid=" + _this.cell.id + "]").text(_this.lastReading);
-    });
-
-    $("button[id=button-close-" + this.cell.id + "]").button({
-      icon: "ui-icon-close",
-      showLabel: false
-    }).on("click", function() {
-      sendRemoveCellToServer(_this.cell.id);
-      $("div[draggable-id=" + _this.cell.id + "]").remove();
     });
 
   }
@@ -207,7 +215,8 @@ class ReadingDialog {
         id: uuidv4(),
         name: this.selectedDeviceName,
         device: this.selectedDevice,
-        reading: this.selectedReading
+        reading: this.selectedReading,
+        position: { left: mainDialog.mouse.x, top: mainDialog.mouse.y }
     };
 
     var reading = new YafuReading(cell, true);
