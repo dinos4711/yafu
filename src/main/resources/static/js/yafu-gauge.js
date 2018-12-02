@@ -20,8 +20,22 @@ class YafuGauge {
       }
     }
 
+    for (var i = 0; i < this.values.length; i++) {
+      this.values[i] = toPossibleInteger(this.values[i]);
+    }
+
+    var onlyIntegers = typeof this.cell.onlyIntegers != 'undefined' && this.cell.onlyIntegers;
+    this.myValuesMap = new Map();
+    for (var i = 0; i < this.values.length; i++) {
+        var active = false;
+        if (!onlyIntegers || isNaN(parseFloat(this.values[i])) || (onlyIntegers && Number.isInteger(this.values[i]))) {
+            active = true;
+        }
+        this.myValuesMap.set(this.values[i], active);
+    }
+
     var myContent = '\
-        <canvas ui-uuid="' + this.cell.id + '" id="' + this.cell.id + '" width="150" height="150" styl="background-color:#000000"></canvas>\
+        <canvas ui-uuid="' + this.cell.id + '" id="' + this.cell.id + '" width="220" height="220" styl="background-color:#000000"></canvas>\
         <div label-id="' + this.cell.id + '" class="editable" style="position: absolute; top: 0px; left: 100px">' + this.cell.name + '</div>\
         <button id="button-close-' + this.cell.id + '" class="hideable" style="position: absolute; top: 0px; right: 0px; width: 18px; height: 18px;">x</button>\
     ';
@@ -42,7 +56,7 @@ class YafuGauge {
       this.cell.position = {top: 50, left: 10};
     }
     if (typeof this.cell.size == 'undefined') {
-      this.cell.size = {width: 150, height: 150};
+      this.cell.size = {width: 220, height: 220};
     }
     $("div[draggable-id=" + this.cell.id + "]").css({top: this.cell.position.top, left: this.cell.position.left, width: this.cell.size.width, height: this.cell.size.height});
     var canvas = document.getElementById(_this.cell.id);
@@ -127,9 +141,11 @@ class YafuGauge {
       if (index != -1) {
         _this.readingAngle = mapNumber(index, 0, _this.values.length - 1, 0, 240) + 150;
         _this.readingValue = _this.values[index];
-        drawGauge(_this);
+      } else {
+        _this.readingAngle = 150;
+        _this.readingValue = toPossibleInteger(value);
       }
-
+      drawGauge(_this);
 
     });
 
@@ -146,6 +162,10 @@ class YafuGauge {
     startGauge(this);
   }
 
+  values() {
+    return Array.from(myValuesMap.keys());
+  }
+
   inform(deviceSetter, value) {
     var mySetter = this.cell.device + '-' + this.cell.setter;
 
@@ -159,8 +179,11 @@ class YafuGauge {
       if (index != -1) {
         this.readingAngle = mapNumber(index, 0, this.values.length - 1, 0, 240) + 150;
         this.readingValue = this.values[index];
-        drawGauge(this);
+      } else {
+        this.readingAngle = 150;
+        this.readingValue = toPossibleInteger(value);
       }
+      drawGauge(this);
     }
 
   }
@@ -207,19 +230,10 @@ function startGauge(gauge) {
           return;
         }
 
-        gauge.drag = false;
-
         mouseToValue(gauge, evt);
         drawGauge(gauge);
 
-        f = gauge.helperAngle;
-
-        var angle = f + 150;
-        if (f <= 30) {
-          angle += 360;
-        }
-        var index = Math.round(mapNumber(angle, 300, 540, 0, gauge.values.length - 1));
-        gauge.helperValue = gauge.values[index];
+        gauge.drag = false;
 
         var device = gauge.cell.device;
         var setter = gauge.cell.setter;
@@ -273,8 +287,8 @@ function startGauge(gauge) {
 
 function mouseToValue(gauge, evt) {
   var mousePos = getMousePos(gauge.canvas, evt);
-  var xRelCenter =   (mousePos.x - gauge.canvas.width  / 2);
-  var yRelCenter = - (mousePos.y - gauge.canvas.height / 2);
+  var xRelCenter = mousePos.x - gauge.canvas.width  / 2;
+  var yRelCenter = mousePos.y - gauge.canvas.height / 2;
   var f = Math.degrees(Math.atan((yRelCenter) / (xRelCenter)));
 
   var signX = Math.sign(xRelCenter);
@@ -284,8 +298,6 @@ function mouseToValue(gauge, evt) {
   } else if (signY == -1) {
     f = 360 + f;
   }
-
-  f = 360 - f;
 
   if (f > 30 && f < 150) {
     var diff1 = f - 30;
@@ -298,14 +310,70 @@ function mouseToValue(gauge, evt) {
   }
 
   if (f <= 30 || f >= 150) {
-      gauge.helperAngle = f;
-
-      var angle = f + 150;
+      valueAngle = f + 150;
       if (f <= 30) {
-        angle += 360;
+        valueAngle += 360;
       }
-      var index = Math.round(mapNumber(angle, 300, 540, 0, gauge.values.length - 1));
+      var index = Math.round(mapNumber(valueAngle, 300, 540, 0, gauge.values.length - 1));
       gauge.helperValue = gauge.values[index];
+
+      if (!gauge.myValuesMap.get(gauge.values[index])) {
+        var index1 = index;
+        for (var i = index-1; i > 0; i--) {
+          if (gauge.myValuesMap.get(gauge.values[i])) {
+            index1 = i;
+            break;
+          }
+        }
+        var index2 = index;
+        for (var i = index+1; i < gauge.values.length; i++) {
+          if (gauge.myValuesMap.get(gauge.values[i])) {
+            index2 = i;
+            break;
+          }
+        }
+
+        var angle1 = mapNumber(index1, 0, gauge.values.length - 1, 300, 540);
+        var angle2 = mapNumber(index2, 0, gauge.values.length - 1, 300, 540);
+        var foundIndex = -1;
+        if (index1 != index) {
+          if (index2 != index) {
+            // Both valid: find the nearest
+            var diff1 = valueAngle - angle1;
+            var diff2 = angle2 - valueAngle;
+            if (diff1 > diff2) {
+              foundIndex = index2;
+              gauge.helperAngle = angle2 - 150;
+            } else {
+              foundIndex = index1;
+              gauge.helperAngle = angle1 - 150;
+            }
+          } else {
+            // Only index1 is valid
+            foundIndex = index1;
+            gauge.helperAngle = angle1 - 150;
+          }
+        } else {
+          if (index2 != index) {
+            // Only index2 is valid
+            foundIndex = index2;
+            gauge.helperAngle = angle2 - 150;
+          } else {
+            // No index is valid -> impossible?
+            console.log("Could not find the nearest value");
+          }
+        }
+
+
+
+        if (foundIndex != -1) {
+          gauge.helperValue = gauge.values[foundIndex];
+        }
+
+      } else {
+        gauge.helperAngle = mapNumber(index, 0, gauge.values.length - 1, 150, 390);
+      }
+
   }
 
 }
@@ -330,10 +398,13 @@ function drawGauge(gauge) {
     gauge.context.lineWidth = width;
     gauge.context.lineCap = "butt";
     for (var i=0; i < gauge.values.length; i++) {
-      var angle = mapNumber(i, 0, gauge.values.length - 1, -30, 210);
+      var angle = mapNumber(i, 0, gauge.values.length - 1, 150, 390);
       var pos = Math.radians(angle);
 
-      drawSmallPiePiece(gauge.context, pos, gauge.radius * 0.6, gauge.radius * 0.9, '#666666', 2);
+      if (gauge.myValuesMap.get(gauge.values[i])) {
+        drawSmallPiePiece(gauge.context, pos, gauge.radius * 0.6, gauge.radius * 0.9, '#666666', 240 / (gauge.values.length * 2 - 1));
+      }
+
     }
 
     if (typeof gauge.readingAngle != undefined && gauge.readingAngle != null && !gauge.drag) {
@@ -341,7 +412,7 @@ function drawGauge(gauge) {
     }
 
     if (gauge.helperAngle != null && gauge.drag) {
-      drawHandAndValue(gauge, gauge.helperAngle, toPossibleInteger(gauge.helperValue), '#ffffff', width);
+      drawHandAndValue(gauge, gauge.helperAngle, toPossibleInteger(gauge.helperValue), '#00ff00', width);
     }
 
 }
@@ -350,7 +421,7 @@ function drawSmallPiePiece(context, angle, minRadius, maxRadius, color, th) {
     context.save();
 
     context.beginPath();
-    context.rotate(-angle);
+    context.rotate(angle);
     context.strokeStyle=color;
     context.fillStyle=color;
     context.lineWidth = 1;
@@ -368,7 +439,7 @@ function drawSmallPiePiece(context, angle, minRadius, maxRadius, color, th) {
 function drawHandAndValue(gauge, angle, value, color, lineWidth) {
     var pos = Math.radians(angle);
 
-    drawSmallPiePiece(gauge.context, -pos, gauge.radius * 0.59, gauge.radius * 0.91, color, 3);
+    drawSmallPiePiece(gauge.context, pos, gauge.radius * 0.6, gauge.radius * 0.9, color, 1.1 * (240 / (gauge.values.length * 2 - 1)));
 
     gauge.context.beginPath();
     gauge.context.fillStyle = color;
@@ -402,6 +473,12 @@ class GaugeDialog {
                   </select>\
               </td>\
           </tr>\
+          <tr>\
+              <td><label for="gaugeDialogOnlyIntegers">Only integers</label></td>\
+              <td>\
+                  <input type="checkbox" name="checkbox-integers" id="gaugeDialogOnlyIntegers">\
+              </td>\
+          </tr>\
       </table>';
 
     var divElement = document.createElement("div");
@@ -427,9 +504,11 @@ class GaugeDialog {
           });
           var values = foundSetter[_this.selectedSetter];
 
+          var onlyIntegers = document.getElementById("gaugeDialogOnlyIntegers").checked;
+
           $( this ).dialog( "close" );
 
-          _this.addNewGauge(values);
+          _this.addNewGauge(values, onlyIntegers);
         }
       }
     });
@@ -475,14 +554,15 @@ class GaugeDialog {
     });
   }
 
-  addNewGauge(valuesString) {
+  addNewGauge(valuesString, onlyIntegers) {
     var cell = {
         type: "Gauge",
         id: uuidv4(),
         name: this.selectedDeviceName,
         device: this.selectedDevice,
         setter: this.selectedSetter,
-        values: valuesString
+        values: valuesString,
+        onlyIntegers: onlyIntegers
     };
     var gauge = new YafuGauge(cell, true);
     allCells.push(gauge);

@@ -69,12 +69,6 @@ label.small {
 }
 
 .reading-wrapper {
-  -moz-border-radius: 25px;
-  -webkit-border-radius: 25px;
-  -khtml-border-radius: 25px;
-  border-radius: 25px;
-  background-color: #4a4a4a;
-  padding: 1em;
   position: absolute;
 }
 
