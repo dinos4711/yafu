@@ -130,11 +130,11 @@ function drawFace(context, radius) {
     var grad;
     context.beginPath();
     context.arc(0, 0, radius, 0, 2*Math.PI);
-    context.fillStyle = 'white';
+    context.fillStyle = '#999999';
     context.fill();
     grad = context.createRadialGradient(0,0,radius*0.95, 0,0,radius*1.05);
     grad.addColorStop(0, '#333');
-    grad.addColorStop(0.5, 'white');
+    grad.addColorStop(0.5, '#999999');
     grad.addColorStop(1, '#333');
     context.strokeStyle = grad;
     context.lineWidth = radius*0.1;
@@ -174,13 +174,13 @@ function drawTime(context, radius){
     hour=(hour*Math.PI/6)+
          (minute*Math.PI/(6*60))+
          (second*Math.PI/(360*60));
-    drawHand(context, hour, radius*0.5, radius*0.07, "#000000");
+    drawHand(context, hour, radius*0.5, radius*0.07, "#222");
     //minute
     minute=(minute*Math.PI/30)+(second*Math.PI/(30*60));
-    drawHand(context, minute, radius*0.8, radius*0.07, "#000000");
+    drawHand(context, minute, radius*0.8, radius*0.07, "#222");
     // second
     second=(second*Math.PI/30);
-    drawHand(context, second, radius*0.9, radius*0.02, "#0000ff");
+    drawHand(context, second, radius*0.9, radius*0.02, "#000099");
   }
 
 function drawHand(context, pos, length, width, color) {
