@@ -184,23 +184,108 @@ class YafuGauge {
 
 }
 
-function getMousePos(canvas, evt) {
+function getMousePos(canvas, evt, isTouch) {
     var rect = canvas.getBoundingClientRect();
-    return {
-      x: evt.clientX - rect.left,
-      y: evt.clientY - rect.top
-    };
+
+    if (isTouch) {
+        return {
+              x: evt.changedTouches[0].clientX - rect.left,
+              y: evt.changedTouches[0].clientY - rect.top
+            };
+    } else {
+        return {
+              x: evt.clientX - rect.left,
+              y: evt.clientY - rect.top
+            };
+    }
+}
+
+function mousedown(gauge, evt, isTouch) {
+    if (config.mode == 'edit') {
+        return;
+    }
+    gauge.drag = true;
+}
+
+function mousemove(gauge, evt, isTouch) {
+    if (config.mode == 'edit') {
+      return;
+    }
+
+    if (!gauge.drag) {
+      return;
+    }
+
+    if (!mouseToValue(gauge, evt, isTouch)) {
+      gauge.helperAngle = null;
+      gauge.drag = false;
+    }
+    drawGauge(gauge);
+}
+
+function mouseup(gauge, evt, isTouch) {
+    $("#infoBox").text("");
+    if (config.mode == 'edit') {
+      return;
+    }
+    if (!gauge.drag) {
+      return;
+    }
+
+    if (!mouseToValue(gauge, evt, isTouch)) {
+      gauge.helperAngle = null;
+      gauge.drag = false;
+      drawGauge(gauge);
+      return;
+    }
+    drawGauge(gauge);
+
+    gauge.drag = false;
+
+    var device = gauge.cell.device;
+    var setter = gauge.cell.setter;
+    var value = gauge.helperValue;
+    var cmd = 'set ' + device + ' ' + setter + ' ' + value;
+    $.toast({
+        heading: 'Send command',
+        text: cmd,
+        loader: false,
+        hideAfter: 2000,
+        showHideTransition: 'slide',
+        icon: 'info'
+    });
+
+    var url = config.fhemHost + '?XHR=1&cmd=' + cmd + '&fwcsrf=' + fhemToken;
+    let username = config.fhemUser;
+    let password = config.fhemPassword;
+
+    let headers = new Headers();
+    headers.set('Authorization', 'Basic ' + window.btoa(username + ":" + password));
+    fetch(url, {method:'POST',
+           headers: headers,
+          }).then(function(response) {
+            console.log("Response:");
+            console.log(response);
+          });
 }
 
 function startGauge(gauge) {
     gauge.canvas = document.getElementById(gauge.cell.id);
     gauge.context = gauge.canvas.getContext("2d");
 
-    var radiusX = gauge.canvas.width / 2;
-    var radiusY = gauge.canvas.height / 2;
+    var width = gauge.canvas.width;
+    var height = width / 2 * Math.cos(Math.radians(60));
+    var radius;
+    if (height > gauge.canvas.height) {
+      gauge.radius = gauge.canvas.height / (1 + Math.cos(Math.radians(60)));
+    } else {
+      gauge.radius = width / 2;
+    }
+
     gauge.drag = false;
 
     gauge.canvas.addEventListener ("mouseout", function(evt) {
+        $("#infoBox").text("");
         if (config.mode == 'edit') {
           return;
         }
@@ -210,79 +295,46 @@ function startGauge(gauge) {
     }, false);
 
     gauge.canvas.addEventListener ("mousedown", function(evt) {
-        if (config.mode == 'edit') {
-          return;
-        }
-        gauge.drag = true;
+        mousedown(gauge, evt, false);
+    }, false);
+
+    gauge.canvas.addEventListener ("touchstart", function(evt) { // like mousedown
+        mousedown(gauge, evt, true);
     }, false);
 
     gauge.canvas.addEventListener ("mouseup", function(evt) {
-        if (config.mode == 'edit') {
-          return;
-        }
-        if (!gauge.drag) {
-          return;
-        }
+        mouseup(gauge, evt, false);
+    }, false);
 
-        mouseToValue(gauge, evt);
-        drawGauge(gauge);
-
-        gauge.drag = false;
-
-        var device = gauge.cell.device;
-        var setter = gauge.cell.setter;
-        var value = gauge.helperValue;
-        var cmd = 'set ' + device + ' ' + setter + ' ' + value;
-        $.toast({
-            heading: 'Send command',
-            text: cmd,
-            loader: false,
-            hideAfter: 2000,
-            showHideTransition: 'slide',
-            icon: 'info'
-        });
-
-        var url = config.fhemHost + '?XHR=1&cmd=' + cmd + '&fwcsrf=' + fhemToken;
-        let username = config.fhemUser;
-        let password = config.fhemPassword;
-
-        let headers = new Headers();
-        headers.set('Authorization', 'Basic ' + window.btoa(username + ":" + password));
-        fetch(url, {method:'POST',
-               headers: headers,
-              }).then(function(response) {
-                console.log("Response:");
-                console.log(response);
-              });
-
+    gauge.canvas.addEventListener ("touchend", function(evt) { // like mouseup
+        mouseup(gauge, evt, true);
     }, false);
 
     gauge.canvas.addEventListener('mousemove', function(evt) {
-        if (config.mode == 'edit') {
-          return;
-        }
-
-        if (!gauge.drag) {
-          return;
-        }
-
-        mouseToValue(gauge, evt);
-        drawGauge(gauge);
-
+        mousemove(gauge, evt, false);
       }, false);
 
-    gauge.context.translate(radiusX, radiusY);
-    radiusX = radiusX * 0.90;
-    radiusY = radiusY * 0.90;
-    gauge.radius = Math.min(radiusX, radiusY);
+    gauge.canvas.addEventListener('touchmove', function(evt) {
+        mousemove(gauge, evt, true);
+      }, false);
+
+//    gauge.context.translate(gauge.canvas.width / 2, gauge.canvas.height / 2);
+    gauge.context.translate(gauge.radius, gauge.radius);
 
     drawGauge(gauge);
 }
 
-function mouseToValue(gauge, evt) {
-  var mousePos = getMousePos(gauge.canvas, evt);
-  var xRelCenter = mousePos.x - gauge.canvas.width  / 2;
-  var yRelCenter = mousePos.y - gauge.canvas.height / 2;
+function mouseToValue(gauge, evt, isTouch) {
+  $("#infoBox").text(isTouch ? "touch" : "mouse");
+  var mousePos = getMousePos(gauge.canvas, evt, isTouch);
+  var xRelCenter = mousePos.x - gauge.radius;
+  var yRelCenter = mousePos.y - gauge.radius;
+
+  var r = Math.sqrt(xRelCenter * xRelCenter + yRelCenter * yRelCenter);
+  if (r > gauge.radius * 1.1 || r < gauge.radius * 0.5) {
+    return false;
+  }
+
   var f = Math.degrees(Math.atan((yRelCenter) / (xRelCenter)));
 
   var signX = Math.sign(xRelCenter);
@@ -367,7 +419,7 @@ function mouseToValue(gauge, evt) {
       }
 
   }
-
+  return true;
 }
 
 function stopGauge(gauge) {
