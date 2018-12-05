@@ -159,19 +159,18 @@ class YafuSlider {
         }
     });
 
-    getDeviceReading(this.cell.device, this.cell.setter, function(data) {
-      var response = JSON.parse(data);
-      var value = response.Results[0].Readings[_this.cell.setter].Value;
+    getDeviceReading(this.cell.device, this.cell.setter, function(response, yafuSlider) {
+      var value = response.Results[0].Readings[yafuSlider.cell.setter].Value;
       var index = -1;
-      for (var i in _this.values) {
-        if (_this.values[i] == value) {
+      for (var i in yafuSlider.values) {
+        if (yafuSlider.values[i] == value) {
           index = i;
         }
       }
       if (index != -1) {
-        _this.mySlider.slider("value", index);
+        yafuSlider.mySlider.slider("value", index);
       }
-    });
+    }, this);
 
     $("button[id=button-close-" + this.cell.id + "]").button({
       icon: "ui-icon-close",

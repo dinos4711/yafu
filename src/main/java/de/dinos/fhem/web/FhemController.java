@@ -13,12 +13,16 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Controller
 public class FhemController {
@@ -29,78 +33,6 @@ public class FhemController {
     System.out.println("Loading " + FhemController.class.getSimpleName());
     File file = new File("test");
     System.out.println(file.getAbsolutePath());
-  }
-
-  @GetMapping("/fhem")
-  public String fhem(Model model, @ModelAttribute("rooms") TreeSet<String> rooms) {
-    devices = getDevices();
-    Set<String> allRooms = devices.getRooms();
-    rooms.addAll(allRooms);
-    for (String aRoom : allRooms) {
-      System.out.println(aRoom);
-    }
-    return "fhem";
-  }
-
-  private Devices getDevices() {
-    try {
-      FhemClient fhemClient = new FhemClient();
-
-      String csrfToken = fhemClient.getCsrfToken();
-      return fhemClient.getDevices(csrfToken);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    return null;
-  }
-
-  private String getReading(String device, String readingName) {
-    FhemClient fhemClient = new FhemClient();
-    try {
-      String csrfToken = fhemClient.getCsrfToken();
-      return fhemClient.getReading(csrfToken, device, readingName);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    return null;
-
-  }
-
-  @GetMapping("/room")
-  public String room(Model model, @RequestParam(name = "room", required = false, defaultValue = "") String room, @ModelAttribute("devices") TreeSet<Device> devicesToShow) {
-    devices = getDevices();
-    if (devices != null) {
-      for (Device device : devices) {
-        if (device.getRooms().contains(room)) {
-          devicesToShow.add(device);
-        }
-      }
-    }
-    model.addAttribute("room", room);
-    return "room";
-  }
-
-  @GetMapping("/device")
-  public String device(Model model, @RequestParam(name = "device", required = false, defaultValue = "") String deviceName, @ModelAttribute("sets") TreeMap<String, List<String>> sets) {
-    devices = getDevices();
-    if (devices != null) {
-      for (Device device : devices) {
-        if (deviceName.equals(device.getName())) {
-          sets.putAll(device.getSets());
-          break;
-        }
-      }
-    }
-    model.addAttribute("device", deviceName);
-    return "device";
-  }
-
-  @RequestMapping(value = "/getDeviceReading", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-  public @ResponseBody
-  String getDeviceReading(@RequestParam(value = "device", required = true) String device,
-                          @RequestParam(value = "reading", required = true) String reading) {
-
-    return getReading(device, reading);
   }
 
   @RequestMapping(value = "/saveConfiguration", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
@@ -197,27 +129,6 @@ public class FhemController {
     return "<b>" + System.currentTimeMillis() + "</b>";
   }
 
-  private String getModelAsHtml(UIModel uiModel) {
-    Set<Page> pages = uiModel.getElements();
-
-    String html =
-        "<table>\n";
-    for (Page page : pages) {
-      html += "  <tr><td>" + page.getName() + "</td><td>" + page.getId() + "</td><td>";
-
-      Set<Cell> cells = page.getElements();
-      html += "<table>";
-      for (Cell cell : cells) {
-        html += "  <tr><td>" + cell.getName() + "</td><td>" + cell.getId() + "</td></tr>";
-      }
-      html += "</table>";
-      html += "</td></tr>";
-    }
-    html += "</table>";
-
-    return html;
-  }
-
   @RequestMapping(value = "/sendCellToServer", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
   public @ResponseBody
   String sendCellToServer(@RequestParam(value = "cell", required = true) String cell) {
@@ -252,5 +163,39 @@ public class FhemController {
 
     return getModelAsHtml(uiModel);
   }
+
+  private Devices getDevices() {
+    try {
+      FhemClient fhemClient = new FhemClient();
+
+      String csrfToken = fhemClient.getCsrfToken();
+      return fhemClient.getDevices(csrfToken);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
+
+  private String getModelAsHtml(UIModel uiModel) {
+    Set<Page> pages = uiModel.getElements();
+
+    String html =
+        "<table>\n";
+    for (Page page : pages) {
+      html += "  <tr><td>" + page.getName() + "</td><td>" + page.getId() + "</td><td>";
+
+      Set<Cell> cells = page.getElements();
+      html += "<table>";
+      for (Cell cell : cells) {
+        html += "  <tr><td>" + cell.getName() + "</td><td>" + cell.getId() + "</td></tr>";
+      }
+      html += "</table>";
+      html += "</td></tr>";
+    }
+    html += "</table>";
+
+    return html;
+  }
+
 
 }

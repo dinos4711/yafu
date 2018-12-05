@@ -127,25 +127,24 @@ class YafuGauge {
 
     this.myGauge = $("div[ui-uuid=" + this.cell.id + "]");
 
-    getDeviceReading(this.cell.device, this.cell.setter, function(data) {
-      var response = JSON.parse(data);
-      var value = response.Results[0].Readings[_this.cell.setter].Value;
+    getDeviceReading(this.cell.device, this.cell.setter, function(response, yafuGauge) {
+      var value = response.Results[0].Readings[yafuGauge.cell.setter].Value;
       var index = -1;
-      for (var i in _this.values) {
-        if (_this.values[i].value == value) {
+      for (var i in yafuGauge.values) {
+        if (yafuGauge.values[i].value == value) {
           index = i;
         }
       }
       if (index != -1) {
-        _this.readingAngle = mapNumber(index, 0, _this.values.length - 1, 0, 240) + 150;
-        _this.readingValue = _this.values[index].value;
+        yafuGauge.readingAngle = mapNumber(index, 0, yafuGauge.values.length - 1, 0, 240) + 150;
+        yafuGauge.readingValue = yafuGauge.values[index].value;
       } else {
-        _this.readingAngle = 150;
-        _this.readingValue = toPossibleInteger(value);
+        yafuGauge.readingAngle = 150;
+        yafuGauge.readingValue = toPossibleInteger(value);
       }
-      drawGauge(_this);
+      drawGauge(yafuGauge);
 
-    });
+    }, this);
 
     $("button[id=button-close-" + this.cell.id + "]").button({
       icon: "ui-icon-close",
@@ -331,7 +330,7 @@ function mouseToValue(gauge, evt, isTouch) {
   var yRelCenter = mousePos.y - gauge.radius;
 
   var r = Math.sqrt(xRelCenter * xRelCenter + yRelCenter * yRelCenter);
-  if (r > gauge.radius * 1.1 || r < gauge.radius * 0.5) {
+  if (r > gauge.radius * 1.2 || r < gauge.radius * 0.4) {
     return false;
   }
 
@@ -489,7 +488,7 @@ function drawHandAndValue(gauge, angle, value, color, lineWidth) {
     gauge.context.fillStyle = color;
     gauge.context.textAlign = "center";
     gauge.context.textBaseline="middle";
-    gauge.context.font = "" + (gauge.radius / 5) + "px Arial";
+    gauge.context.font = "" + (gauge.radius / 4) + "px Arial";
 
     gauge.context.fillText(value, 0, 0);
 }

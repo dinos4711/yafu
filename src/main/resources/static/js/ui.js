@@ -274,20 +274,31 @@ function getContentFromServer(cmdline) {
 
 };
 
-function getDeviceReading(device, reading, callbackFunction) {
+function getDeviceReading(device, reading, callbackFunction, yafuObject) {
 
-	return $.ajax({
-        type: "GET",
-        url: "getDeviceReading",
-        data: {
-			"device": device,
-			"reading": reading,
-			XHR: "1"
-		},
-		success: function(data) {
-		  callbackFunction(data);
-		}
-    });
+    if ((typeof config.fhemHost === undefined) || fhemToken == null) {
+      setTimeout(function() {
+        getDeviceReading( device, reading, callbackFunction, yafuObject );
+      }, 1000);
+      return;
+    }
+
+    var url = encodeURI(config.fhemHost + '?XHR=1&fwcsrf=' + fhemToken + '&cmd=jsonlist2 ' + device + ' ' + reading);
+    let username = config.fhemUser;
+    let password = config.fhemPassword;
+
+    let headers = new Headers();
+    headers.set('Authorization', 'Basic ' + window.btoa(username + ":" + password));
+    fetch(url, {method:'GET',
+           headers: headers,
+          })
+          .then(function(response) { return response.json(); })
+          .then(function(data) {
+            callbackFunction(data, yafuObject);
+          }).catch(function(error) {
+            console.log("Error:");
+            console.log(error);
+          });
 
 };
 

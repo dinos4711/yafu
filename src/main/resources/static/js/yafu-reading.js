@@ -9,7 +9,7 @@ class YafuReading {
     this.cell = cell;
 
     var myContent = '\
-        <div ui-uuid="' + this.cell.id + '" title="' + this.cell.name + ' : ' + this.cell.reading + '" yafu-inform="' + this.cell.device + '-' + this.cell.reading + '">\
+        <div ui-uuid="' + this.cell.id + '" title="' + this.cell.name + ' : ' + this.cell.reading + '" yafu-inform="' + this.cell.device + '-' + this.cell.reading + '" style="text-align: center;">\
           ?\
         </div>\
     ';
@@ -94,12 +94,11 @@ class YafuReading {
         }
     });
 
-    getDeviceReading(this.cell.device, this.cell.reading, function(data) {
-      var response = JSON.parse(data);
-      var value = response.Results[0].Readings[_this.cell.reading].Value;
-      _this.lastReading = toPossibleInteger(value);
-      $("div[ui-uuid=" + _this.cell.id + "]").text(_this.lastReading);
-    });
+    getDeviceReading(this.cell.device, this.cell.reading, function(response, yafuReading) {
+      var value = response.Results[0].Readings[yafuReading.cell.reading].Value;
+      yafuReading.lastReading = toPossibleInteger(value);
+      $("div[ui-uuid=" + yafuReading.cell.id + "]").text(yafuReading.lastReading);
+    }, this);
 
   }
 
