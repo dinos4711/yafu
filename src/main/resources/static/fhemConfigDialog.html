@@ -1,0 +1,24 @@
+<div id="fhemConfigDialog" title="Konfiguration der FHEM-Verbindung" >
+    <form>
+        <fieldset>
+            <label for="fhemHost">FHEM host</label>
+            <input type="text" name="fhemHost" id="fhemHost" placeholder="FHEM URL" class="text ui-widget-content ui-corner-all">
+            <br />
+            <label for="fhemUser">User</label>
+            <input type="text" name="fhemUser" id="fhemUser" placeholder="Username" class="text ui-widget-content ui-corner-all">
+            <br />
+            <label for="fhemPassword">Password</label>
+            <input type="password" name="fhemPassword" id="fhemPassword" placeholder="Password" class="text ui-widget-content ui-corner-all">
+            <br />
+            <label for="proxyHost">Proxy host</label>
+            <input type="text" name="proxyHost" id="proxyHost" placeholder="Proxy host" class="text ui-widget-content ui-corner-all">
+            <br />
+            <label for="proxyPort">Proxy port</label>
+            <input type="number" min="0" value="80" name="proxyPort" id="proxyPort" placeholder="Proxy port" class="text ui-widget-content ui-corner-all">
+            <br />
+            <p id="status"></p>
+            <!-- Allow form submission with keyboard without duplicating the dialog button -->
+            <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
+        </fieldset>
+    </form>
+</div>

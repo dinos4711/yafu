@@ -9,14 +9,14 @@ import static org.apache.commons.lang3.StringUtils.split;
 import static org.apache.commons.lang3.builder.ToStringStyle.SIMPLE_STYLE;
 
 public class Device implements Comparable<Device> {
-  private Map<String, List<String>> sets = new TreeMap<>(String::compareToIgnoreCase);
+  private Map<String, List<String>> setters = new TreeMap<>(String::compareToIgnoreCase);
   private Map<String, Object> internals = new TreeMap<>(String::compareToIgnoreCase);
   private Map<String, Object> attributes = new TreeMap<>(String::compareToIgnoreCase);
   private Set<String> readings = new TreeSet<>(String::compareToIgnoreCase);
   private String name;
 
-  public Map<String, List<String>> getSets() {
-    return sets;
+  public Map<String, List<String>> getSetters() {
+    return setters;
   }
 
   public Map<String, Object> getInternals() {
@@ -72,7 +72,7 @@ public class Device implements Comparable<Device> {
       String[] possibleSets = split(possibleSetsString, " ");
       for (String possibleSet : possibleSets) {
         String[] set = split(possibleSet, ":");
-        List<String> setList = device.sets.computeIfAbsent(set[0], k -> new ArrayList<>());
+        List<String> setList = device.setters.computeIfAbsent(set[0], k -> new ArrayList<>());
         if (set.length == 2) {
           String[] possibleValues = split(set[1], ",");
           setList.addAll(Arrays.asList(possibleValues));
@@ -98,7 +98,7 @@ public class Device implements Comparable<Device> {
   public String toString() {
     return new ToStringBuilder(this, SIMPLE_STYLE)
         .append(name + (internals.get("TYPE") != null ? "[" + internals.get("TYPE") + "]" : ""))
-        .append("sets", sets)
+        .append("setters", setters)
         .append("internals", internals)
         .append("readings", readings)
         .toString();

@@ -13,16 +13,12 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Controller
 public class FhemController {
@@ -35,9 +31,15 @@ public class FhemController {
     System.out.println(file.getAbsolutePath());
   }
 
+  @GetMapping("/greeting")
+  public String greeting(@RequestParam(name = "name", required = false, defaultValue = "World") String name, Model model) {
+    model.addAttribute("name", name);
+    return "greeting";
+  }
+
   @RequestMapping(value = "/saveConfiguration", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
   public @ResponseBody
-  String saveConfiguration(@RequestParam(value = "config", required = true) String config) {
+  String saveConfiguration(@RequestParam(name = "config", required = true) String config) {
 
     try {
       Configuration.store(config);
@@ -68,13 +70,52 @@ public class FhemController {
     }
   }
 
+  @RequestMapping(value = "/getUIContent", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+  public @ResponseBody
+  String getUIContent(@RequestParam(name = "page", required = false, defaultValue = "home") String pageName) {
+    UIModel uiModel = UIModel.readFromFile(new File("ui.json"));
+    Page page = uiModel.getPage(pageName);
+    if (page != null) {
+      JSONObject result = new JSONObject();
+      result.put("page", page);
+      if (uiModel.has("menu")) {
+        JSONObject menuObject = (JSONObject) uiModel.get("menu");
+        JSONArray entries = menuObject.getJSONArray("entries");
+        for (Page onePage : uiModel.getElements()) {
+          JSONObject entry;
+
+          boolean found = false;
+          for (Object o : entries) {
+            entry = (JSONObject) o;
+            if (entry.get("name").equals(onePage.getName())) {
+              found = true;
+              break;
+            }
+          }
+          if (!found) {
+            entry = new JSONObject();
+            entry.put("name", onePage.getName());
+            entries.put(entry);
+          }
+        }
+
+        result.put("menu", menuObject);
+      }
+      return result.toString();
+    } else {
+      return new JSONObject().toString();
+    }
+  }
+
+  public static void main(String[] args) {
+    FhemController fhemController = new FhemController();
+    String home = fhemController.getUIContent("home");
+    System.out.println(home);
+  }
+
   @RequestMapping(value = "/getContentFromServer", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
   public @ResponseBody
-  String getContentFromServer(@RequestParam(value = "cmd", required = true) String cmd) {
-    if ("getUIContent".equals(cmd)) {
-      UIModel uiModel = UIModel.readFromFile(new File("ui.json"));
-      return uiModel.toString();
-    }
+  String getContentFromServer(@RequestParam(name = "cmd", required = true) String cmd) {
     if ("getDevices".equals(cmd)) {
       devices = getDevices();
       Set<String> deviceNames = devices.getDeviceNames();
@@ -85,10 +126,11 @@ public class FhemController {
       return names.toString();
     }
 
-    if ("getDevicesWithSliders".equals(cmd) || "getDevicesWithGauges".equals(cmd)) {
+    if ("getDevicesWithSliders".equals(cmd) || "getDevicesWithGauges".equals(cmd) || "getDevicesWithTimerButtons".equals(cmd)) {
       devices = getDevices();
       JSONArray jsonDevices = new JSONArray();
-      Map<Device, Map<String, List<String>>> devicesWithSliders = devices.getDevicesWithPossibleSliders();
+      int minValueCount = "getDevicesWithTimerButtons".equals(cmd) ? 1 : 2;
+      Map<Device, Map<String, List<String>>> devicesWithSliders = devices.getDevicesWithPossibleSetters(minValueCount);
       for (Device device : devicesWithSliders.keySet()) {
         Map<String, List<String>> stringListMap = devicesWithSliders.get(device);
         JSONObject jsonDevice = new JSONObject();
@@ -129,9 +171,59 @@ public class FhemController {
     return "<b>" + System.currentTimeMillis() + "</b>";
   }
 
+  @RequestMapping(value = "/sendNewPageToServer", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+  public @ResponseBody
+  String sendNewPageToServer(@RequestParam(name = "page", required = false, defaultValue = "home") String pageName) {
+
+    File modelFile = new File("ui.json");
+    UIModel uiModel = UIModel.readFromFile(modelFile);
+    uiModel.addPage(new Page(pageName));
+    uiModel.writeToFile(modelFile);
+
+    return "Ok.";
+  }
+
+  @RequestMapping(value = "/sendRemoveMenuToServer", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+  public @ResponseBody
+  String sendRemoveMenuToServer() {
+    File modelFile = new File("ui.json");
+
+    UIModel uiModel = UIModel.readFromFile(modelFile);
+    if (uiModel.has("menu")) {
+      uiModel.remove("menu");
+      uiModel.writeToFile(modelFile);
+    }
+
+    return "Ok.";
+  }
+
+  @RequestMapping(value = "/sendMenuToServer", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+  public @ResponseBody
+  String sendMenuToServer(@RequestParam(name = "menu", required = true) String menu) {
+    File modelFile = new File("ui.json");
+
+    UIModel uiModel = UIModel.readFromFile(modelFile);
+    JSONObject menuObject = new JSONObject(menu);
+    JSONObject myMenu;
+    if (!uiModel.has("menu")) {
+      uiModel.put("menu", new JSONObject());
+
+    }
+    myMenu = (JSONObject) uiModel.get("menu");
+
+    for (String key : menuObject.keySet()) {
+      myMenu.put(key, menuObject.get(key));
+    }
+
+    uiModel.writeToFile(modelFile);
+
+    return "Ok.";
+  }
+
   @RequestMapping(value = "/sendCellToServer", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
   public @ResponseBody
-  String sendCellToServer(@RequestParam(value = "cell", required = true) String cell) {
+  String sendCellToServer(@RequestParam(name = "cell", required = true) String cell,
+                          @RequestParam(name = "page", required = false, defaultValue = "home") String pageName) {
 
     File modelFile = new File("ui.json");
     UIModel uiModel = UIModel.readFromFile(modelFile);
@@ -143,25 +235,26 @@ public class FhemController {
       newCell.put(key, cellObject.get(key));
     }
 
-    Page homePage = uiModel.getElements().iterator().next();
-    homePage.addCell(newCell);
+    Page page = uiModel.getPage(pageName);
+    page.addCell(newCell);
     uiModel.writeToFile(modelFile);
 
-    return getModelAsHtml(uiModel);
+    return "Ok.";
   }
 
   @RequestMapping(value = "/sendRemoveCellToServer", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
   public @ResponseBody
-  String sendRemoveCellToServer(@RequestParam(value = "cell", required = true) String cell) {
+  String sendRemoveCellToServer(@RequestParam(name = "cell", required = true) String cell,
+                                @RequestParam(name = "page", required = false, defaultValue = "home") String pageName) {
 
     File modelFile = new File("ui.json");
     UIModel uiModel = UIModel.readFromFile(modelFile);
     JSONObject cellObject = new JSONObject(cell);
-    Page homePage = uiModel.getElements().iterator().next();
-    homePage.removeCell(cellObject.getString("id"));
+    Page page = uiModel.getPage(pageName);
+    page.removeCell(cellObject.getString("id"));
     uiModel.writeToFile(modelFile);
 
-    return getModelAsHtml(uiModel);
+    return "Ok.";
   }
 
   private Devices getDevices() {
@@ -175,27 +268,5 @@ public class FhemController {
     }
     return null;
   }
-
-  private String getModelAsHtml(UIModel uiModel) {
-    Set<Page> pages = uiModel.getElements();
-
-    String html =
-        "<table>\n";
-    for (Page page : pages) {
-      html += "  <tr><td>" + page.getName() + "</td><td>" + page.getId() + "</td><td>";
-
-      Set<Cell> cells = page.getElements();
-      html += "<table>";
-      for (Cell cell : cells) {
-        html += "  <tr><td>" + cell.getName() + "</td><td>" + cell.getId() + "</td></tr>";
-      }
-      html += "</table>";
-      html += "</td></tr>";
-    }
-    html += "</table>";
-
-    return html;
-  }
-
 
 }

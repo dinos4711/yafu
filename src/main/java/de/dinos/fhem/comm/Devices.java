@@ -24,17 +24,17 @@ public class Devices extends TreeSet<Device> {
     return deviceNames;
   }
 
-  public Map<Device, Map<String, List<String>>> getDevicesWithPossibleSliders() {
+  public Map<Device, Map<String, List<String>>> getDevicesWithPossibleSetters(int minValueCount) {
     Map<Device, Map<String, List<String>>> devicesWithSliders = new TreeMap<>();
     for (Device device : this) {
       Object type = device.getInternals().get("TYPE");
       if ("FileLog".equals(type)) {
         continue;
       }
-      Map<String, List<String>> sets = device.getSets();
+      Map<String, List<String>> sets = device.getSetters();
       for (String setName : sets.keySet()) {
         List<String> setList = sets.get(setName);
-        if (setList != null && setList.size() > 1) {
+        if (setList != null && setList.size() >= minValueCount) {
           Map<String, List<String>> stringListMap = devicesWithSliders.computeIfAbsent(device, k -> new TreeMap<>());
           stringListMap.put(setName, setList);
         }

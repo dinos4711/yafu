@@ -179,7 +179,7 @@ public class FhemClient {
     }
     System.out.println(names);
 
-    Map<Device, Map<String, List<String>>> devicesWithSliders = devices.getDevicesWithPossibleSliders();
+    Map<Device, Map<String, List<String>>> devicesWithSliders = devices.getDevicesWithPossibleSetters(2);
 
     for (Device device : devicesWithSliders.keySet()) {
       System.out.println("--------------------------");

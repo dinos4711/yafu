@@ -5,6 +5,16 @@ var allCells = new Array();
 var sliderDialog;
 var readingDialog;
 var gaugeDialog;
+var timerButtonDialog;
+
+var mainDialog;
+var addPageDialog;
+var fhemConfigDialog;
+var readableContextMenuDialog;
+var timerButtonContextMenuDialog;
+var menuEntryContextMenuDialog;
+
+var globalMenu = {};
 
 function getConfiguration() {
 
@@ -115,6 +125,209 @@ function updateEditMode() {
 
 function initDialogs() {
 
+    $.ajax({
+        type: "GET",
+        url: "addPageDialog.html",
+        cache: false,
+        success: function(data) {
+            createAddPageDialog(data);
+        }
+    });
+
+    $.ajax({
+        type: "GET",
+        url: "fhemConfigDialog.html",
+        cache: false,
+        success: function(data) {
+            createFhemConfigDialog(data);
+        }
+    });
+
+    $.ajax({
+        type: "GET",
+        url: "mainDialog.html",
+        cache: false,
+        success: function(data) {
+            createMainDialog(data);
+        }
+    });
+
+    $.ajax({
+        type: "GET",
+        url: "readableContextMenuDialog.html",
+        cache: false,
+        success: function(data) {
+            createReadableContextMenuDialog(data);
+        }
+    });
+
+    $.ajax({
+        type: "GET",
+        url: "timerButtonContextMenuDialog.html",
+        cache: false,
+        success: function(data) {
+            createTimerButtonContextMenuDialog(data);
+        }
+    });
+
+    $.ajax({
+        type: "GET",
+        url: "menuEntryContextMenuDialog.html",
+        cache: false,
+        success: function(data) {
+            createMenuEntryContextMenuDialog(data);
+        }
+    });
+
+    $( ".icon-close" ).button( {
+        icon: "ui-icon-close",
+        showLabel: false
+    } );
+
+};
+
+function createMenuEntryContextMenuDialog(data) {
+    var element = document.createElement("div");
+    element.innerHTML = data;
+    document.body.appendChild(element);
+
+    menuEntryContextMenuDialog = $( "#menuEntryContextMenuDialog" ).dialog({
+      autoOpen: false,
+      modal: true
+    });
+    $("#menuEntryContextMenuDialog").css('z-index', 9999);
+    $( "#menuEntryContextMenu" ).menu();
+}
+
+function createReadableContextMenuDialog(data) {
+    var element = document.createElement("div");
+    element.innerHTML = data;
+    document.body.appendChild(element);
+
+    readableContextMenuDialog = $( "#readableContextMenuDialog" ).dialog({
+      autoOpen: false,
+      modal: true
+    });
+    $("#readableContextMenuDialog").css('z-index', 9999);
+    $( "#readableContextMenu" ).menu();
+}
+
+function createTimerButtonContextMenuDialog(data) {
+    var element = document.createElement("div");
+    element.innerHTML = data;
+    document.body.appendChild(element);
+
+    timerButtonContextMenuDialog = $( "#timerButtonContextMenuDialog" ).dialog({
+      autoOpen: false,
+      modal: true
+    });
+    $("#timerButtonContextMenuDialog").css('z-index', 9999);
+    $( "#timerButtonContextMenu" ).menu();
+}
+
+function createMainDialog(data) {
+    var element = document.createElement("div");
+    element.innerHTML = data;
+    document.body.appendChild(element);
+
+    mainDialog = $( "#mainDialog" ).dialog({
+      autoOpen: false,
+      modal: true
+    });
+    $("#mainDialog").css('z-index', 9999);
+
+    $( "#mainMenu" ).menu();
+
+    $('#menu_mode').click(function() {
+        if (config.mode == 'edit') {
+          config.mode = 'view';
+          $('#menu_mode').text('Set edit mode');
+        } else {
+          config.mode = 'edit';
+          $('#menu_mode').text('Set view mode');
+        }
+        updateEditMode();
+        saveConfiguration();
+        mainDialog.dialog( "close");
+    });
+
+    $('#menu_settings').click(function() {
+        mainDialog.dialog( "close");
+        fhemConfigDialog.dialog( "open" );
+    });
+
+    $('#menu_add_page').click(function() {
+        mainDialog.dialog( "close");
+        addNewPage();
+    });
+
+    $('#menu_add_menu').click(function() {
+        mainDialog.dialog( "close");
+        addMenu();
+    });
+
+    $('#menu_add_clock').click(function() {
+        mainDialog.dialog( "close");
+        addNewClock();
+    });
+
+    $('#menu_add_new_gauge').click(function(){
+        mainDialog.dialog( "close");
+        gaugeDialog.open();
+    });
+
+    $('#menu_add_new_slider').click(function(){
+        mainDialog.dialog( "close");
+        sliderDialog.open();
+    });
+
+    $('#menu_add_new_gauge').click(function(){
+        mainDialog.dialog( "close");
+        gaugeDialog.open();
+    });
+
+    $('#menu_add_new_timer_button').click(function(){
+        mainDialog.dialog( "close");
+        timerButtonDialog.open();
+    });
+
+    $('#menu_add_new_reading').click(function(){
+        mainDialog.dialog( "close");
+        readingDialog.open();
+    });
+
+}
+
+function createAddPageDialog(data) {
+    var element = document.createElement("div");
+    element.innerHTML = data;
+    document.body.appendChild(element);
+
+    addPageDialog = $( "#addPageDialog" ).dialog({
+      autoOpen: false,
+      height: 380,
+      width: 500,
+      modal: true,
+      buttons: {
+        Ok: function() {
+          console.log("Create page " + $( "#pageName" ).val());
+          addPageDialog.dialog( "close" );
+          sendNewPageToServer($( "#pageName" ).val());
+        },
+        Cancel: function() {
+          addPageDialog.dialog( "close" );
+        }
+      }
+
+    });
+
+}
+
+function createFhemConfigDialog(data) {
+    var element = document.createElement("div");
+    element.innerHTML = data;
+    document.body.appendChild(element);
+
     fhemConfigDialog = $( "#fhemConfigDialog" ).dialog({
       autoOpen: false,
       height: 380,
@@ -185,85 +398,30 @@ function initDialogs() {
       }
     });
 
-    form = fhemConfigDialog.find( "form" ).on( "submit", function( event ) {
+    fhemConfigDialog.find( "form" ).on( "submit", function( event ) {
       event.preventDefault();
       console.log("Let's see ...");
     });
 
-    mainDialog = $( "#mainDialog" ).dialog({
-      autoOpen: false,
-      modal: true
-    });
-    $("#mainDialog").css('z-index', 9999);
+}
 
-    $( "#mainMenu" ).menu();
+function getPageName() {
+    var url = new URL(window.location.href);
+    var pageName = url.searchParams.get("page");
+    if (pageName == null) {
+      pageName = "home";
+    }
 
-    $('#menu_mode').click(function() {
-        if (config.mode == 'edit') {
-          config.mode = 'view';
-          $('#menu_mode').text('Set edit mode');
-        } else {
-          config.mode = 'edit';
-          $('#menu_mode').text('Set view mode');
-        }
-        updateEditMode();
-        saveConfiguration();
-        mainDialog.dialog( "close");
-    });
+    return pageName;
+}
 
-    $('#menu_settings').click(function() {
-        mainDialog.dialog( "close");
-        fhemConfigDialog.dialog( "open" );
-    });
-
-    $('#menu_clock').click(function() {
-        mainDialog.dialog( "close");
-        addNewClock();
-    });
-
-    $('#menu_add_new_gauge').click(function(){
-        mainDialog.dialog( "close");
-        gaugeDialog.open();
-    });
-
-    $('#menu_add_new_slider').click(function(){
-        mainDialog.dialog( "close");
-        sliderDialog.open();
-    });
-
-    $('#menu_add_new_gauge').click(function(){
-        mainDialog.dialog( "close");
-        gaugeDialog.open();
-    });
-
-    $('#menu_add_new_reading').click(function(){
-        mainDialog.dialog( "close");
-        readingDialog.open();
-    });
-
-    $( ".icon-close" ).button( {
-        icon: "ui-icon-close",
-        showLabel: false
-    } );
-
-    readableContextMenuDialog = $( "#readableContextMenuDialog" ).dialog({
-      autoOpen: false,
-      modal: true
-    });
-    $("#readableContextMenuDialog").css('z-index', 9999);
-    $( "#readableContextMenu" ).menu();
-
-};
-
-function getContentFromServer(cmdline) {
-	cmdline = cmdline.replace('  ', ' ');
-
+function getUIContent() {
 	return $.ajax({
         type: "GET",
-        url: "getContentFromServer",
+        url: "getUIContent",
         data: {
-			cmd: cmdline,
-			XHR: "1"
+			XHR: "1",
+			page: getPageName()
 		},
 		success: function(data) {
 		    buildModel(data);
@@ -309,6 +467,25 @@ function uuidv4() {
   });
 }
 
+function addNewPage() {
+  addPageDialog.dialog( "open" );
+}
+
+function addMenu() {
+  globalMenu = {
+      "entries": [],
+      "size": {
+        "width": 100,
+        "height": 300
+      },
+      "position": {
+        "top": 10,
+        "left": 10
+      }
+  }
+  new YafuMenu(globalMenu, true);
+}
+
 function addNewClock() {
   var cell = {
     type: "Clock",
@@ -322,10 +499,10 @@ function addNewClock() {
 }
 
 function buildModel(modelString) {
-  var json = JSON.parse(modelString);
-  var firstPage = json.pages[0];
-  for (i in firstPage.cells) {
-      cell = firstPage.cells[i];
+  var result = JSON.parse(modelString);
+  var page = result.page;
+  for (i in page.cells) {
+      cell = page.cells[i];
       if (cell.type == "Slider") {
         var slider = new YafuSlider(cell, false);
         allCells.push(slider);
@@ -338,12 +515,46 @@ function buildModel(modelString) {
       } else if (cell.type == "Gauge") {
         var gauge = new YafuGauge(cell, false);
         allCells.push(gauge);
+      } else if (cell.type == "TimerButton") {
+        var timerButton = new YafuTimerButton(cell, false);
+        allCells.push(timerButton);
       } else {
         addCell(cell.id, cell.name, false);
         cellElement = $("div[ui-uuid=" + cell.id + "]");
         cellElement.css({top: cell.position.top, left: cell.position.left, width: cell.size.width, height: cell.size.height, position:'absolute'});
       }
   }
+  globalMenu = result.menu;
+
+  if (typeof globalMenu != 'undefined' && globalMenu.entries != null) {
+    new YafuMenu(globalMenu, false);
+  }
+}
+
+function sendNewPageToServer(pageName) {
+     $.ajax({
+         type: "GET",
+         url: "sendNewPageToServer",
+         data: {
+            page: pageName,
+            XHR: "1"
+        },
+        contentType: "application/json; charset=utf-8",
+        success: function() {
+          location.reload();
+        },
+        error: function(data) {
+            $.toast({
+                     heading: 'Error',
+                     text: JSON.stringify(cell),
+                     loader: false,
+                     hideAfter: 1000,
+                     showHideTransition: 'slide',
+                     icon: 'error'
+                 });
+        }
+
+     });
 }
 
 function sendCellToServer(cell) {
@@ -352,6 +563,7 @@ function sendCellToServer(cell) {
          url: "sendCellToServer",
          data: {
             cell: JSON.stringify(cell),
+            page: getPageName(),
             XHR: "1"
         },
         contentType: "application/json; charset=utf-8",
@@ -384,6 +596,7 @@ function sendRemoveCellToServer(cellUUID) {
              url: "sendRemoveCellToServer",
              data: {
      			cell: JSON.stringify(cell),
+     			page: getPageName(),
      			XHR: "1"
      		},
      		error: function(data) {
@@ -404,7 +617,7 @@ function refreshDraggable(sendToServer = false) {
     $(".yafu-draggable").each(function() {
       draggable = $(this).draggable({
           containment: "document",
-          snap: true,
+          snap: false,
           grid: [ 10, 10 ],
           stack: ".yafu-draggable",
           stop: function( event, ui ) {
@@ -482,9 +695,10 @@ $(document).ready(function() {
      width:"auto"
   });
 
-  sliderDialog  = new SliderDialog();
-  readingDialog = new ReadingDialog();
-  gaugeDialog   = new GaugeDialog();
+  sliderDialog      = new SliderDialog();
+  readingDialog     = new ReadingDialog();
+  gaugeDialog       = new GaugeDialog();
+  timerButtonDialog = new TimerButtonDialog();
 
   var htmlCanvas = document.getElementById('backgroundCanvas');
   $( "#backgroundCanvas" ).contextmenu(function(evt) {
@@ -502,7 +716,7 @@ $(document).ready(function() {
 
   getConfiguration();
 
-  getContentFromServer("getUIContent");
+  getUIContent();
 
   playWithCanvas();
 
@@ -593,7 +807,6 @@ function playWithCanvas() {
 var fhemToken = null;
 
 function getFhemToken() {
-    console.log("Start getFhemToken()");
 
     try {
         var url = config.fhemHost;
@@ -617,7 +830,6 @@ function getFhemToken() {
         setTimeout(getFhemToken, 5000);
     }
 
-    console.log("End getFhemToken()");
 }
 
 // Ajax activity indicator bound to ajax start/stop document events
@@ -626,6 +838,10 @@ $(document).ajaxStart(function(){
 }).ajaxStop(function(){
   $('#ajaxBusy').hide();
 });
+
+//$.ajaxSetup({
+//    cache: false
+//});
 
 // Converts from degrees to radians.
 Math.radians = function(degrees) {

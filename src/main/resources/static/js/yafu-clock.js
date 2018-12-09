@@ -33,7 +33,7 @@ class YafuClock {
 
     $("div[draggable-id=" + this.cell.id + "]").draggable({
       containment: "document",
-      snap: true,
+      snap: false,
       snapTolerance: 5,
       grid: [ gridSize, gridSize ],
       stack: ".clock-wrapper",

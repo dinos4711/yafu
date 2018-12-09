@@ -8,6 +8,9 @@ class YafuGauge {
 
     this.cell = cell;
 
+    this.xShift = 0;
+    this.yShift = 0;
+
     this.values = cell.values.split(',');
     if (this.values[0] == 'slider') {
       var vMin  = parseFloat(this.values[1]);
@@ -64,7 +67,7 @@ class YafuGauge {
 
     $("div[draggable-id=" + this.cell.id + "]").draggable({
       containment: "document",
-      snap: true,
+      snap: false,
       snapTolerance: 5,
       grid: [ gridSize, gridSize ],
       stack: ".gauge-wrapper",
@@ -203,11 +206,19 @@ function mousedown(gauge, evt, isTouch) {
     if (config.mode == 'edit') {
         return;
     }
+    if (evt.button == 2) {
+      return;
+    }
+
     gauge.drag = true;
 }
 
 function mousemove(gauge, evt, isTouch) {
     if (config.mode == 'edit') {
+      return;
+    }
+
+    if (evt.button == 2) {
       return;
     }
 
@@ -228,6 +239,10 @@ function mouseup(gauge, evt, isTouch) {
       return;
     }
     if (!gauge.drag) {
+      return;
+    }
+
+    if (evt.button == 2) {
       return;
     }
 
@@ -437,7 +452,7 @@ function drawGauge(gauge) {
     // Restore the transform
     gauge.context.restore();
 
-    gauge.context.strokeStyle='#666666';
+    gauge.context.strokeStyle='#808080';
     gauge.context.lineWidth = width;
     gauge.context.lineCap = "butt";
     for (var i=0; i < gauge.values.length; i++) {
@@ -445,16 +460,18 @@ function drawGauge(gauge) {
       var pos = Math.radians(angle);
 
       if (gauge.values[i].active) {
-        drawSmallPiePiece(gauge.context, pos, gauge.radius * 0.6, gauge.radius * 0.9, '#666666', 240 / (gauge.values.length * 2 - 1));
+        drawSmallPiePiece(gauge.context, pos, gauge.radius * 0.6, gauge.radius * 0.9, '#808080', 240 / (gauge.values.length * 2 - 1));
       }
 
     }
 
     if (typeof gauge.readingAngle != undefined && gauge.readingAngle != null && !gauge.drag) {
-      drawHandAndValue(gauge, gauge.readingAngle, toPossibleInteger(gauge.readingValue), '#F59B00', width);
+      gauge.shifted = false;
+      drawHandAndValue(gauge, gauge.readingAngle, toPossibleInteger(gauge.readingValue), '#aa6900', width);
     }
 
     if (gauge.helperAngle != null && gauge.drag) {
+      gauge.shifted = true;
       drawHandAndValue(gauge, gauge.helperAngle, toPossibleInteger(gauge.helperValue), '#00ff00', width);
     }
 
@@ -486,11 +503,44 @@ function drawHandAndValue(gauge, angle, value, color, lineWidth) {
 
     gauge.context.beginPath();
     gauge.context.fillStyle = color;
-    gauge.context.textAlign = "center";
-    gauge.context.textBaseline="middle";
+    gauge.context.textAlign = gauge.shifted ? "left" : "center";
+    gauge.context.textBaseline= gauge.shifted ? "top" : "middle";
     gauge.context.font = "" + (gauge.radius / 4) + "px Arial";
 
-    gauge.context.fillText(value, 0, 0);
+    gauge.context.fillText(value, gauge.xShift, gauge.yShift);
+
+    var drawAgain = false;
+    if (gauge.shifted) {
+      if (gauge.xShift > -gauge.radius + 10) {
+        gauge.xShift--;
+        drawAgain = true;
+      }
+      if (gauge.yShift > -gauge.radius + 10) {
+        gauge.yShift--;
+        drawAgain = true;
+      }
+    } else {
+      if (gauge.xShift < 0) {
+        gauge.xShift+=3;
+        if (gauge.xShift > 0) {
+          gauge.xShift = 0;
+        }
+        drawAgain = true;
+      }
+      if (gauge.yShift < 0) {
+        gauge.yShift+=3;
+        if (gauge.yShift > 0) {
+          gauge.yShift = 0;
+        }
+        drawAgain = true;
+      }
+    }
+
+    if (drawAgain) {
+      setTimeout(function() {
+        drawGauge(gauge);
+      }, 10);
+    }
 }
 
 

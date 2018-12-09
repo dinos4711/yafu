@@ -16,11 +16,12 @@
     <script src="js/jquery.toast.js"></script>
     <script src="js/fhemweb.js"></script>
     <script src="js/ui.js"></script>
+    <script src="js/yafu-menu.js"></script>
     <script src="js/yafu-slider.js"></script>
     <script src="js/yafu-reading.js"></script>
     <script src="js/yafu-clock.js"></script>
     <script src="js/yafu-gauge.js"></script>
-
+    <script src="js/yafu-timer.js"></script>
 
     <style>
       fieldset {
@@ -53,47 +54,6 @@
 
 </div>
 
-<div id="fhemConfigDialog" title="Konfiguration der FHEM-Verbindung">
-    <form>
-        <fieldset>
-            <label for="fhemHost">FHEM host</label>
-            <input type="text" name="fhemHost" id="fhemHost" placeholder="FHEM URL" class="text ui-widget-content ui-corner-all">
-            <br />
-            <label for="fhemUser">User</label>
-            <input type="text" name="fhemUser" id="fhemUser" placeholder="Username" class="text ui-widget-content ui-corner-all">
-            <br />
-            <label for="fhemPassword">Password</label>
-            <input type="password" name="fhemPassword" id="fhemPassword" placeholder="Password" class="text ui-widget-content ui-corner-all">
-            <br />
-            <label for="proxyHost">Proxy host</label>
-            <input type="text" name="proxyHost" id="proxyHost" placeholder="Proxy host" class="text ui-widget-content ui-corner-all">
-            <br />
-            <label for="proxyPort">Proxy port</label>
-            <input type="number" min="0" value="80" name="proxyPort" id="proxyPort" placeholder="Proxy port" class="text ui-widget-content ui-corner-all">
-            <br />
-            <p id="status"></p>
-            <!-- Allow form submission with keyboard without duplicating the dialog button -->
-            <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
-        </fieldset>
-    </form>
-</div>
-
-<div id="mainDialog" title="Menu">
-    <ul id="mainMenu">
-        <li><div id="menu_mode">Set edit mode</div></li>
-        <li><div id="menu_settings" class="canGetDisabled" >Settings</div></li>
-        <li><div id="menu_clock" class="canGetDisabled" >Add clock</div></li>
-        <li><div id="menu_add_new_gauge" class="canGetDisabled" >Add gauge</div></li>
-        <li><div id="menu_add_new_slider" class="canGetDisabled" >Add slider</div></li>
-        <li><div id="menu_add_new_reading" class="canGetDisabled" >Add reading</div></li>
-    </ul>
-</div>
-
-<div id="readableContextMenuDialog" title="Menu">
-    <ul id="readableContextMenu">
-        <li><div id="menu_readableDelete">Delete</div></li>
-    </ul>
-</div>
 
 <script>
 

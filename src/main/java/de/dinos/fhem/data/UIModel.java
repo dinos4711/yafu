@@ -16,11 +16,30 @@ public class UIModel extends ContainerOf<Page> {
   }
 
   public void addPage(Page page) {
+    for (Page myPage : getElements()) {
+      if (myPage.getName().equals(page.getName())) {
+        return;
+      }
+    }
+
     addElement(page);
   }
 
   public void removePage(Page page) {
     removeElement(page);
+  }
+
+
+  public Page getPage(String pageName) {
+    for (Page page : getElements()) {
+      if (page.getName().equals(pageName)) {
+        return page;
+      }
+    }
+
+    Page page = new Page(pageName);
+    addPage(page);
+    return page;
   }
 
   public void removePage(String pageName) {
@@ -94,8 +113,9 @@ public class UIModel extends ContainerOf<Page> {
 
     }
     UIModel uiModel = new UIModel("empty");
-    Page page = new Page("home");
+    Page page = new Page("Home");
     uiModel.addPage(page);
+    uiModel.writeToFile(file);
     return uiModel;
   }
 
@@ -104,9 +124,11 @@ public class UIModel extends ContainerOf<Page> {
 
     Page page1 = new Page("page 1");
     Page page2 = new Page("page 2");
+    Page page3 = new Page("page 3");
 
     model.addPage(page1);
     model.addPage(page2);
+    model.addPage(page3);
 
     JSONArray array = new JSONArray();
     array.put(new JSONObject().put("extra 1", "value 1"));
@@ -128,9 +150,19 @@ public class UIModel extends ContainerOf<Page> {
     page2.addCell(cell2page2);
     page2.addCell(cell3page2);
 
+    Cell cell1page3 = new Cell("cell 1 in page 3");
+    Cell cell2page3 = new Cell("cell 2 in page 3");
+    Cell cell3page3 = new Cell("cell 3 in page 3");
+
+    page3.addCell(cell1page3);
+    page3.addCell(cell2page3);
+    page3.addCell(cell3page3);
+
     page2.removeCell(cell2page2);
 
     model.removePage(page1);
+
+    Page page = model.getPage("page 3");
 
     File file = new File("model.json");
     model.writeToFile(file);
@@ -144,5 +176,6 @@ public class UIModel extends ContainerOf<Page> {
     UIModel model2 = UIModel.readFromFile(new File("empty"));
     System.out.println(model2);
   }
+
 
 }
