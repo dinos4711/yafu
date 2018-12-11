@@ -1,5 +1,6 @@
 package de.dinos.fhem.comm;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.json.JSONObject;
 
@@ -42,6 +43,54 @@ public class Device implements Comparable<Device> {
     return name;
   }
 
+  public String getType() {
+    if (internals.containsKey("TYPE")) {
+      return (String) internals.get("TYPE");
+    }
+    return "?";
+  }
+
+
+  public JSONObject toJSON() {
+    JSONObject jsonObject = new JSONObject();
+
+    jsonObject.put("Name", getName());
+
+    if (!this.internals.isEmpty()) {
+      JSONObject internals = new JSONObject();
+      for (String name : this.internals.keySet()) {
+        internals.put(name, this.internals.get(name));
+      }
+      jsonObject.put("Internals", internals);
+    }
+
+    if (!this.attributes.isEmpty()) {
+      JSONObject attributes = new JSONObject();
+      for (String name : this.attributes.keySet()) {
+        attributes.put(name, this.attributes.get(name));
+      }
+      jsonObject.put("Attributes", attributes);
+    }
+
+    if (!this.readings.isEmpty()) {
+      jsonObject.put("Readings", StringUtils.join(readings, ","));
+    }
+
+    if (!this.setters.isEmpty()) {
+      List<String> result = new ArrayList<>();
+      for (String name : setters.keySet()) {
+        String values = StringUtils.join(setters.get(name), ",");
+        if (values.isEmpty()) {
+          result.add(name);
+        } else {
+          result.add(name + ":" + values);
+        }
+      }
+      jsonObject.put("PossibleSets", StringUtils.join(result, " "));
+    }
+
+    return jsonObject;
+  }
 
   public static Device fromJSON(JSONObject jsonObject) {
     Device device = new Device();

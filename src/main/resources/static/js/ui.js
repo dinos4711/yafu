@@ -613,6 +613,30 @@ function sendRemoveCellToServer(cellUUID) {
          });
 }
 
+function sendCommandToFhem(cmd) {
+    $.toast({
+        heading: 'Send command',
+        text: cmd,
+        loader: false,
+        hideAfter: 2000,
+        showHideTransition: 'slide',
+        icon: 'info'
+    });
+
+    var url = config.fhemHost + '?XHR=1&cmd=' + cmd + '&fwcsrf=' + fhemToken;
+    let username = config.fhemUser;
+    let password = config.fhemPassword;
+
+    let headers = new Headers();
+    headers.set('Authorization', 'Basic ' + window.btoa(username + ":" + password));
+    fetch(url, {method:'POST',
+           headers: headers,
+          }).then(function(response) {
+            console.log("Response:");
+            console.log(response);
+          });
+}
+
 function refreshDraggable(sendToServer = false) {
     $(".yafu-draggable").each(function() {
       draggable = $(this).draggable({
@@ -872,4 +896,21 @@ function toPossibleInteger(value) {
   }
 
   return result;
+}
+
+function millisecondsToDateTime(millisecs) {
+    var t = new Date(1970, 0, 1); // Epoch
+    t.setMilliseconds(millisecs);
+    return t;
+}
+
+function secondsToDateTime(secs) {
+    var t = new Date(1970, 0, 1); // Epoch
+    t.setSeconds(secs);
+    return t;
+}
+
+Date.prototype.addHours = function(h) {
+   this.setTime(this.getTime() + (h*60*60*1000));
+   return this;
 }

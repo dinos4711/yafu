@@ -109,8 +109,47 @@ public class FhemController {
 
   public static void main(String[] args) {
     FhemController fhemController = new FhemController();
-    String home = fhemController.getUIContent("home");
-    System.out.println(home);
+    String result = fhemController.getContentFromServer("getDevicesWithTimerButtons");
+    System.out.println(result);
+
+    String setters = fhemController.getDeviceSetters("HT_Kueche");
+    System.out.println(setters);
+  }
+
+  @RequestMapping(value = "/getTimers", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+  public @ResponseBody
+  String getTimers(@RequestParam(name = "deviceName", required = true) String deviceName) {
+    JSONArray result = new JSONArray();
+
+    devices = getDevices();
+    for (Device device : devices) {
+      if ("at".equals(device.getType()) && device.getName().startsWith("yafu_" + deviceName + "_")) {
+        result.put(device.toJSON());
+      }
+    }
+
+    return result.toString();
+  }
+
+  @RequestMapping(value = "/getDeviceSetters", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+  public @ResponseBody
+  String getDeviceSetters(@RequestParam(name = "device", required = true) String deviceName) {
+    devices = getDevices();
+
+    JSONArray jsonSetters = new JSONArray();
+
+    for (Device device : devices) {
+      if (deviceName.equals(device.getName())) {
+        for (String setterName : device.getSetters().keySet()) {
+          List<String> valueList = device.getSetters().get(setterName);
+          JSONObject jsonSetter = new JSONObject();
+          jsonSetter.put(setterName, StringUtils.join(valueList, ","));
+          jsonSetters.put(jsonSetter);
+        }
+      }
+    }
+
+    return jsonSetters.toString();
   }
 
   @RequestMapping(value = "/getContentFromServer", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
@@ -129,7 +168,7 @@ public class FhemController {
     if ("getDevicesWithSliders".equals(cmd) || "getDevicesWithGauges".equals(cmd) || "getDevicesWithTimerButtons".equals(cmd)) {
       devices = getDevices();
       JSONArray jsonDevices = new JSONArray();
-      int minValueCount = "getDevicesWithTimerButtons".equals(cmd) ? 1 : 2;
+      int minValueCount = "getDevicesWithTimerButtons".equals(cmd) ? 0 : 2;
       Map<Device, Map<String, List<String>>> devicesWithSliders = devices.getDevicesWithPossibleSetters(minValueCount);
       for (Device device : devicesWithSliders.keySet()) {
         Map<String, List<String>> stringListMap = devicesWithSliders.get(device);
@@ -137,15 +176,17 @@ public class FhemController {
         jsonDevice.put("deviceName", device.getName());
         jsonDevice.put("displayName", device.getDisplayName());
 
-        JSONArray jsonSetters = new JSONArray();
-        for (String setterName : stringListMap.keySet()) {
-          List<String> valueList = stringListMap.get(setterName);
-          JSONObject jsonSetter = new JSONObject();
-          jsonSetter.put(setterName, StringUtils.join(valueList, ","));
+        if (!"getDevicesWithTimerButtons".equals(cmd)) {
+          JSONArray jsonSetters = new JSONArray();
+          for (String setterName : stringListMap.keySet()) {
+            List<String> valueList = stringListMap.get(setterName);
+            JSONObject jsonSetter = new JSONObject();
+            jsonSetter.put(setterName, StringUtils.join(valueList, ","));
 
-          jsonSetters.put(jsonSetter);
+            jsonSetters.put(jsonSetter);
+          }
+          jsonDevice.put("setters", jsonSetters);
         }
-        jsonDevice.put("setters", jsonSetters);
 
         jsonDevices.put(jsonDevice);
       }

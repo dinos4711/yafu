@@ -135,28 +135,8 @@ class YafuSlider {
 
         var value = _this.values[ui.value];
         var cmd = 'set ' + device + ' ' + setter + ' ' + value;
-        $.toast({
-            heading: 'Send command',
-            text: cmd,
-            loader: false,
-            hideAfter: 2000,
-            showHideTransition: 'slide',
-            icon: 'info'
-        });
-
-        var url = config.fhemHost + '?XHR=1&cmd=' + cmd + '&fwcsrf=' + fhemToken;
-        let username = config.fhemUser;
-        let password = config.fhemPassword;
-
-        let headers = new Headers();
-        headers.set('Authorization', 'Basic ' + window.btoa(username + ":" + password));
-        fetch(url, {method:'POST',
-               headers: headers,
-              }).then(function(response) {
-                console.log("Response:");
-                console.log(response);
-              });
-        }
+        sendCommandToFhem(cmd);
+      }
     });
 
     getDeviceReading(this.cell.device, this.cell.setter, function(response, yafuSlider) {

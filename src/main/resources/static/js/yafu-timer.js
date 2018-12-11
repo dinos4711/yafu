@@ -4,7 +4,7 @@
 
 class YafuTimerButton {
     constructor(cell, sendToServer = false) {
-        var _this = this;
+        var thisYafuTimerButton = this;
 
         this.cell = cell;
 
@@ -42,8 +42,8 @@ class YafuTimerButton {
             if (config.mode == 'edit') {
                 $('#menu_timerButtonDelete').click(function() {
                     timerButtonContextMenuDialog.dialog( "close");
-                    sendRemoveCellToServer(_this.cell.id);
-                    $("div[draggable-id=" + _this.cell.id + "]").remove();
+                    sendRemoveCellToServer(thisYafuTimerButton.cell.id);
+                    $("div[draggable-id=" + thisYafuTimerButton.cell.id + "]").remove();
                 });
                 timerButtonContextMenuDialog.dialog( "open");
             }
@@ -54,12 +54,12 @@ class YafuTimerButton {
           snap: false,
           snapTolerance: 5,
           grid: [ gridSize, gridSize ],
-          stack: ".slider-wrapper",
+          stack: ".timer-button-wrapper",
           create: function( event, ui ) {
             if (sendToServer) {
-              _this.cell.position = ui.position;
-              _this.cell.size = ui.size;
-              sendCellToServer(_this.cell);
+              thisYafuTimerButton.cell.position = ui.position;
+              thisYafuTimerButton.cell.size = ui.size;
+              sendCellToServer(thisYafuTimerButton.cell);
             }
           },
           drag: function( event, ui ) {
@@ -74,21 +74,21 @@ class YafuTimerButton {
             var myLeft = Math.round(parseFloat($(this).position().left) / gridSize) * gridSize;
             $(this).css({top: myTop, left: myLeft});
 
-            if (_this.cell.withLabel) {
-                $("div[label-id=" + _this.cell.id + "]").text(_this.cell.name);
+            if (thisYafuTimerButton.cell.withLabel) {
+                $("div[label-id=" + thisYafuTimerButton.cell.id + "]").text(thisYafuTimerButton.cell.name);
             }
             $("#infoBox").text("");
-            _this.cell.position = $(this).position();
-            _this.cell.size = { width: $(this).width(), height: $(this).height() };
-            sendCellToServer(_this.cell);
+            thisYafuTimerButton.cell.position = $(this).position();
+            thisYafuTimerButton.cell.size = { width: $(this).width(), height: $(this).height() };
+            sendCellToServer(thisYafuTimerButton.cell);
           }
         });
 
         if (cell.withLabel) {
             $("div[label-id=" + this.cell.id + "]").draggable({
                 stop: function( event, ui ) {
-                    _this.cell.labelPosition = $(this).position();
-                    sendCellToServer(_this.cell);
+                    thisYafuTimerButton.cell.labelPosition = $(this).position();
+                    sendCellToServer(thisYafuTimerButton.cell);
                 }
             });
         }
@@ -96,13 +96,287 @@ class YafuTimerButton {
         this.myButton = $("div[ui-uuid=" + this.cell.id + "]");
         this.myButton.on("click", function() {
             if (config.mode != 'edit') {
-                console.log("Here we are");
+                new TimersDialog(thisYafuTimerButton.cell);
             }
         });
     }
 
     inform(deviceSetter, value) {
 
+    }
+}
+
+class TimersDialog {
+    constructor(cell) {
+        var thisTimersDialog = this;
+        this.cell = cell;
+
+        var myContent = '\
+          <table id="timers" class="ui-widget ui-widget-content">\
+            <thead>\
+              <tr class="ui-widget-header ">\
+                <th>Date/Time</th>\
+                <th>Command</th>\
+                <th>Actions</th>\
+              </tr>\
+            </thead>\
+            <tbody id="timers-tbody">\
+              <tr>\
+                <td>Please wait ...</td>\
+                <td>Please wait ...</td>\
+                <td>Please wait ...</td>\
+              </tr>\
+            </tbody>\
+          </table>\
+        ';
+
+        var cellElement = document.createElement("div");
+        cellElement.setAttribute("id", "timers-container");
+        cellElement.setAttribute("class", "ui-widget");
+        cellElement.setAttribute("title", "Timers for " + this.cell.name);
+
+        cellElement.innerHTML = myContent;
+        document.getElementById("uicontainer").appendChild(cellElement);
+
+        var dialog = $( "#timers-container" ).dialog({
+            width: 650,
+            height: 350,
+            create: function() {
+                thisTimersDialog.getTimerData();
+            },
+            buttons: {
+                Add: function() {
+                    dialog.dialog( "close" );
+                    new AddNewTimerDialog(thisTimersDialog.cell);
+
+                },
+                Ok: function() {
+                    dialog.dialog( "close" );
+                }
+            },
+            close: function() {
+                dialog.dialog( "destroy" );
+                var nodeToDelete = document.getElementById("timers-container")
+                nodeToDelete.parentNode.removeChild(nodeToDelete);
+            }
+        });
+    }
+
+    getTimerData() {
+        var thisTimersDialog = this;
+
+        $.ajax({
+            type: "GET",
+            url: "getTimers",
+            data: {
+                deviceName: thisTimersDialog.cell.device,
+                XHR: "1"
+            },
+            success: function(data) {
+                thisTimersDialog.updateTimersTable(data);
+            }
+
+        });
+    }
+
+    updateTimersTable(data) {
+        var thisTimersDialog = this;
+
+        this.timers = JSON.parse(data);
+
+        var myContent = '';
+        for (var i in this.timers) {
+            var m = moment(this.timers[i].Internals.TRIGGERTIME_FMT, "YYYY-MM-DD HH:mm:ss"); // 2018-12-10 23:20:35
+            myContent += '\
+                  <tr>\
+                    <td>' + m.format('DD.MM.YYYY HH:mm:ss') + '</td>\
+                    <td>' + this.timers[i].Internals.COMMAND + '</td>\
+                    <td><button id="' + this.timers[i].Name + '">Delete</button></td>\
+                  </tr>\
+            ';
+
+        }
+        document.getElementById("timers-tbody").innerHTML = myContent;
+
+        for (var i in this.timers) {
+            var timerName = this.timers[i].Name;
+            $("#" + timerName).on("click", function() {
+                var fhemCommand = "delete " + timerName;
+                sendCommandToFhem(fhemCommand);
+                thisTimersDialog.getTimerData();
+            });
+        }
+    }
+
+}
+
+class AddNewTimerDialog {
+    constructor(cell) {
+        this.cell = cell;
+        var thisAddNewTimerDialog = this;
+
+      var myContent = '\
+        <p>Select a setter, a value and enter a relative time</p>\
+        <table>\
+            <tr>\
+                <td><label for="addNewTimerDialogSelectSetter">Setter</label></td>\
+                <td>\
+                    <select id="addNewTimerDialogSelectSetter">\
+                        <option>Please wait ...</option>\
+                    </select>\
+                </td>\
+            </tr>\
+            <tr>\
+                <td><label for="addNewTimerDialogSelectSetterValue">Value</label></td>\
+                <td>\
+                    <select id="addNewTimerDialogSelectSetterValue">\
+                        <option>Please wait ...</option>\
+                    </select>\
+                </td>\
+            </tr>\
+            <tr>\
+                <td><label for="addNewTimerDialogSelectSetterValue">Time</label></td>\
+                <td><input type="text" name="time" id="addNewTimerDialogTime" class="text ui-widget-content ui-corner-all"></td>\
+            </tr>\
+        </table>';
+
+        var cellElement = document.createElement("div");
+        cellElement.id="newTimerDialog";
+        cellElement.title="New Timer";
+        cellElement.innerHTML = myContent;
+        document.getElementById("uicontainer").appendChild(cellElement);
+
+        var dialog = $( "#newTimerDialog" ).dialog({
+            width: 650,
+            height: 350,
+            buttons: {
+                Cancel: function() {
+                    dialog.dialog( "close" );
+
+                },
+                Ok: function() {
+                    var time = $( "#addNewTimerDialogTime" ).val().replace(/\+/g, "%2B");
+
+                    var somethingUnique = uuidv4().replace(/-/g, "_");
+                    var fhemCommand = 'define yafu_' + thisAddNewTimerDialog.cell.device + '_' + somethingUnique + ' at ' + time +
+                        ' set ' + thisAddNewTimerDialog.cell.device + ' ' + thisAddNewTimerDialog.selectedSetter + ' ' + thisAddNewTimerDialog.selectedValue;
+
+                    sendCommandToFhem(fhemCommand);
+
+                    dialog.dialog( "close" );
+                }
+            },
+            close: function() {
+                dialog.dialog( "destroy" );
+                var nodeToDelete = document.getElementById("newTimerDialog")
+                nodeToDelete.parentNode.removeChild(nodeToDelete);
+            }
+        });
+
+        $( "#addNewTimerDialogSelectSetter" ).selectmenu({
+            width: 450,
+            create: function() {
+                thisAddNewTimerDialog.getSetters();
+            },
+            change: function( event, data ) {
+                thisAddNewTimerDialog.selectedSetter = data.item.element.attr("setter");
+                thisAddNewTimerDialog.updateValues();
+
+            }
+        });
+
+        $( "#addNewTimerDialogSelectSetterValue" ).selectmenu({
+            width: 450,
+            change: function( event, data ) {
+                thisAddNewTimerDialog.selectedValue = data.item.element.attr("value");
+            }
+        });
+
+
+    }
+
+    getSetters() {
+
+        var thisAddNewTimerDialog = this;
+
+        $.ajax({
+            type: "GET",
+            url: "getDeviceSetters",
+            data: {
+                device: this.cell.device,
+                XHR: "1"
+            },
+            success: function(data) {
+                thisAddNewTimerDialog.updateSetters(data);
+            }
+
+        });
+    }
+
+    updateSetters(data) {
+
+        var thisAddNewTimerDialog = this;
+
+        this.setters = JSON.parse(data);
+
+        var setters = this.setters;
+
+        var selectSetterDOM = document.getElementById("addNewTimerDialogSelectSetter");
+        selectSetterDOM.innerHTML = "";
+
+        var isFirst = 1;
+        for (var i in setters) {
+            for (var setterName in setters[i]) {
+                var optionDiv = document.createElement("option");
+                optionDiv.innerHTML = setterName;
+                optionDiv.setAttribute("setter", setterName);
+                selectSetterDOM.appendChild(optionDiv);
+                if (isFirst == 1) {
+                    isFirst = 0;
+                    this.selectedSetter = setterName;
+                }
+            }
+        }
+
+        $( "#addNewTimerDialogSelectSetter" ).selectmenu( "refresh" );
+
+        this.updateValues();
+    }
+
+    updateValues() {
+        var setterName = this.selectedSetter;
+
+        var foundSetter = this.setters.find(function(element) {
+            return typeof element[setterName] != 'undefined';
+        });
+        var valuesString = foundSetter[setterName];
+
+        var selectValuesDOM = document.getElementById("addNewTimerDialogSelectSetterValue");
+        selectValuesDOM.innerHTML = "";
+        var values = valuesString.split(',');
+        if (values[0] == 'slider') {
+          var vMin  = parseFloat(values[1]);
+          var vStep = parseFloat(values[2]);
+          var vMax  = parseFloat(values[3]);
+
+          values = new Array();
+          for (var i = vMin ; i <= vMax; i += vStep) {
+            values.push(i);
+          }
+        }
+
+        var isFirst = 1;
+        for (var i in values) {
+            var optionDiv = document.createElement("option");
+            optionDiv.innerHTML = values[i];
+            optionDiv.setAttribute("value", values[i]);
+            selectValuesDOM.appendChild(optionDiv);
+            if (isFirst == 1) {
+                isFirst = 0;
+                this.selectedValue = values[i];
+            }
+        }
+        $( "#addNewTimerDialogSelectSetterValue" ).selectmenu( "refresh" );
     }
 }
 
@@ -134,7 +408,7 @@ class TimerButtonDialog {
     divElement.innerHTML = dialogContent;
     document.body.appendChild(divElement);
 
-    var _this = this;
+    var thisTimerButtonDialog = this;
 
     this.dialog = $( "#timerButtonDialog" ).dialog({
       width: 650,
@@ -145,7 +419,7 @@ class TimerButtonDialog {
         Ok: function() {
           var withLabel = document.getElementById("timerButtonDialogWithLabel").checked;
           $( this ).dialog( "close" );
-          _this.addNewTimerButton(withLabel);
+          thisTimerButtonDialog.addNewTimerButton(withLabel);
         }
       }
     });
@@ -153,8 +427,8 @@ class TimerButtonDialog {
     $( "#timerButtonDialogSelectDevice" ).selectmenu({
       width: 450,
       change: function( event, data ) {
-        _this.selectedDevice = data.item.element.attr("fhem-device");
-        _this.selectedDeviceName = data.item.element.attr("fhem-deviceName");
+        thisTimerButtonDialog.selectedDevice = data.item.element.attr("fhem-device");
+        thisTimerButtonDialog.selectedDeviceName = data.item.element.attr("fhem-deviceName");
       }
     });
 
@@ -194,7 +468,7 @@ class TimerButtonDialog {
 
   open() {
     this.dialog.dialog( "open" );
-    var _this = this;
+    var thisTimerButtonDialog = this;
 
     return $.ajax({
             type: "GET",
@@ -204,7 +478,7 @@ class TimerButtonDialog {
     			XHR: "1"
     		},
     		success: function(data) {
-    		    _this.updateNewTimerButtonDialog(data);
+    		    thisTimerButtonDialog.updateNewTimerButtonDialog(data);
     		}
 
         });
