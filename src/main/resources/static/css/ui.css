@@ -151,3 +151,15 @@ label.small {
   width:35px;
   float:right;
 }
+
+.ui-selectmenu-menu .ui-menu {
+  max-height: 100px;
+}
+
+input.hue-range {
+  outline: 0;
+  -webkit-appearance: none;
+  width: 400px;
+  height: 20px;
+  background: linear-gradient(to right, hsl(0, 100%, 88%) 0%, hsl(30, 100%, 88%) 8.3%, hsl(60, 100%, 88%) 16.6%, hsl(90, 100%, 88%) 25%, hsl(120, 100%, 88%) 33.3%, hsl(150, 100%, 88%) 41.6%, hsl(180, 100%, 88%) 50%, hsl(210, 100%, 88%) 58.3%, hsl(240, 100%, 88%) 66.6%, hsl(270, 100%, 88%) 75%, hsl(300, 100%, 88%) 83.3%, hsl(330, 100%, 88%) 91.6%, hsl(360, 100%, 88%) 100%);
+}

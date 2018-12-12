@@ -139,27 +139,39 @@ class TimersDialog {
         document.getElementById("uicontainer").appendChild(cellElement);
 
         var dialog = $( "#timers-container" ).dialog({
+            modal: true,
             width: 650,
             height: 350,
             create: function() {
                 thisTimersDialog.getTimerData();
             },
-            buttons: {
-                Add: function() {
-                    dialog.dialog( "close" );
-                    new AddNewTimerDialog(thisTimersDialog.cell);
-
+            buttons: [
+                {
+                    id: "timersDialogButtonAdd",
+                    text: "Add",
+                    click: function() {
+                        dialog.dialog( "close" );
+                        new AddNewTimerDialog(thisTimersDialog.cell);
+                    }
                 },
-                Ok: function() {
-                    dialog.dialog( "close" );
+                {
+                    id: "timersDialogButtonOk",
+                    text: "Ok",
+                    click: function() {
+                        dialog.dialog( "close" );
+                    }
                 }
-            },
+              ],
+
             close: function() {
                 dialog.dialog( "destroy" );
                 var nodeToDelete = document.getElementById("timers-container")
                 nodeToDelete.parentNode.removeChild(nodeToDelete);
             }
         });
+
+        $("#timersDialogButtonAdd").button("option", "disabled", true);
+        $("#timersDialogButtonOk").button("option", "disabled", true);
     }
 
     getTimerData() {
@@ -206,9 +218,18 @@ class TimersDialog {
                 thisTimersDialog.getTimerData();
             });
         }
+
+        $("#timersDialogButtonAdd").button("option", "disabled", false);
+        $("#timersDialogButtonOk").button("option", "disabled", false);
     }
 
 }
+
+const MODE_NO_VALUE     = 0;
+const MODE_SELECT_VALUE = 1;
+const MODE_ENTER_VALUE  = 2;
+const MODE_RGB_VALUE    = 3;
+const MODE_HUE_VALUE    = 4;
 
 class AddNewTimerDialog {
     constructor(cell) {
@@ -242,11 +263,12 @@ class AddNewTimerDialog {
 
         var cellElement = document.createElement("div");
         cellElement.id="newTimerDialog";
-        cellElement.title="New Timer";
+        cellElement.title="New Timer for " + cell.name;
         cellElement.innerHTML = myContent;
         document.getElementById("uicontainer").appendChild(cellElement);
 
         var dialog = $( "#newTimerDialog" ).dialog({
+            modal: true,
             width: 650,
             height: 350,
             buttons: {
@@ -256,10 +278,28 @@ class AddNewTimerDialog {
                 },
                 Ok: function() {
                     var time = $( "#addNewTimerDialogTime" ).val().replace(/\+/g, "%2B");
-
+                    var value;
+                    switch (thisAddNewTimerDialog.valueMode) {
+                        case MODE_NO_VALUE:
+                            value = '';
+                            break;
+                        case MODE_SELECT_VALUE:
+                            value = thisAddNewTimerDialog.selectedValue;
+                            break;
+                        case MODE_ENTER_VALUE:
+                            value = $( "#addNewTimerDialogSelectSetterValue" ).val();
+                            break;
+                        case MODE_RGB_VALUE:
+                            value = $( "#addNewTimerDialogSelectSetterValue" ).val();
+                            value = value.replace("#", "");
+                            break;
+                        case MODE_HUE_VALUE:
+                            value = $( "#addNewTimerDialogSelectSetterValue" ).val();
+                            break;
+                    }
                     var somethingUnique = uuidv4().replace(/-/g, "_");
                     var fhemCommand = 'define yafu_' + thisAddNewTimerDialog.cell.device + '_' + somethingUnique + ' at ' + time +
-                        ' set ' + thisAddNewTimerDialog.cell.device + ' ' + thisAddNewTimerDialog.selectedSetter + ' ' + thisAddNewTimerDialog.selectedValue;
+                        ' set ' + thisAddNewTimerDialog.cell.device + ' ' + thisAddNewTimerDialog.selectedSetter + ' ' + value;
 
                     sendCommandToFhem(fhemCommand);
 
@@ -314,7 +354,6 @@ class AddNewTimerDialog {
     }
 
     updateSetters(data) {
-
         var thisAddNewTimerDialog = this;
 
         this.setters = JSON.parse(data);
@@ -344,6 +383,8 @@ class AddNewTimerDialog {
     }
 
     updateValues() {
+        var thisAddNewTimerDialog = this;
+
         var setterName = this.selectedSetter;
 
         var foundSetter = this.setters.find(function(element) {
@@ -351,8 +392,6 @@ class AddNewTimerDialog {
         });
         var valuesString = foundSetter[setterName];
 
-        var selectValuesDOM = document.getElementById("addNewTimerDialogSelectSetterValue");
-        selectValuesDOM.innerHTML = "";
         var values = valuesString.split(',');
         if (values[0] == 'slider') {
           var vMin  = parseFloat(values[1]);
@@ -365,18 +404,96 @@ class AddNewTimerDialog {
           }
         }
 
-        var isFirst = 1;
-        for (var i in values) {
-            var optionDiv = document.createElement("option");
-            optionDiv.innerHTML = values[i];
-            optionDiv.setAttribute("value", values[i]);
-            selectValuesDOM.appendChild(optionDiv);
-            if (isFirst == 1) {
-                isFirst = 0;
-                this.selectedValue = values[i];
+        this.valueMode = MODE_SELECT_VALUE;
+
+        if (values.length == 0) {
+            this.valueMode = MODE_NO_VALUE;
+        }
+        if (values.length == 1) {
+            if (values[0] == 'noArg') {
+                this.valueMode = MODE_NO_VALUE;
+                this.selectedValue = '';
+            }
+            if (values[0] == '') {
+                this.valueMode = MODE_ENTER_VALUE;
             }
         }
-        $( "#addNewTimerDialogSelectSetterValue" ).selectmenu( "refresh" );
+
+        if (values[0] == 'colorpicker') {
+            if (values[1] == 'RGB') {
+                this.valueMode = MODE_RGB_VALUE;
+            }
+            if (values[1] == 'HUE') {
+                this.valueMode = MODE_HUE_VALUE;
+            }
+        }
+
+        console.log(this.valueMode);
+
+//            <tr>\
+//                <td><label for="addNewTimerDialogSelectSetterValue">Value</label></td>\
+//                <td>\
+//                    <select id="addNewTimerDialogSelectSetterValue">\
+//                        <option>Please wait ...</option>\
+//                    </select>\
+//                </td>\
+//            </tr>\
+
+        var addNewTimerDialogSelectSetterValue = document.getElementById("addNewTimerDialogSelectSetterValue")
+        var tdNode = addNewTimerDialogSelectSetterValue.parentNode;
+        var trNode = tdNode.parentNode;
+        trNode.removeChild(tdNode);
+
+        var valueNodeContent;
+        switch (this.valueMode) {
+            case MODE_NO_VALUE:
+                valueNodeContent = '<div id="addNewTimerDialogSelectSetterValue"></div>'; // place holder
+                this.selectedValue = '';
+                break;
+            case MODE_SELECT_VALUE:
+                valueNodeContent = '\
+                    <select id="addNewTimerDialogSelectSetterValue">\
+                        <option>Please wait ...</option>\
+                    </select>\
+                ';
+                break;
+            case MODE_ENTER_VALUE:
+                valueNodeContent = '<input type="text" name="time" id="addNewTimerDialogSelectSetterValue" class="text ui-widget-content ui-corner-all">';
+                break;
+            case MODE_RGB_VALUE:
+                valueNodeContent = '<input type="color" name="color" id="addNewTimerDialogSelectSetterValue" />';
+                break;
+            case MODE_HUE_VALUE:
+                valueNodeContent = '<input id="addNewTimerDialogSelectSetterValue" type="range" min="0" max="360" step="1" class="hue-range"/>';
+                break;
+        }
+
+        tdNode = document.createElement("td");
+        tdNode.innerHTML = valueNodeContent;
+        trNode.appendChild(tdNode);
+
+        if (this.valueMode == MODE_SELECT_VALUE) {
+            var selectValuesDOM = document.getElementById("addNewTimerDialogSelectSetterValue");
+            selectValuesDOM.innerHTML = "";
+            var isFirst = 1;
+            for (var i in values) {
+                var optionDiv = document.createElement("option");
+                optionDiv.innerHTML = values[i];
+                optionDiv.setAttribute("value", values[i]);
+                selectValuesDOM.appendChild(optionDiv);
+                if (isFirst == 1) {
+                    isFirst = 0;
+                    this.selectedValue = values[i];
+                }
+            }
+            $( "#addNewTimerDialogSelectSetterValue" ).selectmenu({
+                width: 450,
+                change: function( event, data ) {
+                    thisAddNewTimerDialog.selectedValue = data.item.element.attr("value");
+                }
+            });
+        }
+
     }
 }
 

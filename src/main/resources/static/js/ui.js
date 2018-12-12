@@ -614,6 +614,8 @@ function sendRemoveCellToServer(cellUUID) {
 }
 
 function sendCommandToFhem(cmd) {
+    console.log("Sending : " + cmd);
+
     $.toast({
         heading: 'Send command',
         text: cmd,
