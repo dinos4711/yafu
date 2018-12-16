@@ -118,7 +118,7 @@ class YafuReading {
 
 }
 
-class ReadingDialog {
+class AddNewReadingDialog {
   constructor() {
       var dialogContent = '\
         <p>Select a device and a device reading</p>\
@@ -142,14 +142,14 @@ class ReadingDialog {
         </table>';
 
       var divElement = document.createElement("div");
-      divElement.id="readingDialog";
+      divElement.id="addNewReadingDialog";
       divElement.title="New Reading";
       divElement.innerHTML = dialogContent;
       document.body.appendChild(divElement);
 
       var _this = this;
 
-      this.dialog = $( "#readingDialog" ).dialog({
+      this.dialog = $( "#addNewReadingDialog" ).dialog({
         width: 650,
         height: 350,
         modal: true,

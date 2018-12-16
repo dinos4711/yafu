@@ -72,6 +72,10 @@ label.small {
   position: absolute;
 }
 
+.switch-wrapper {
+  position: absolute;
+}
+
 .infoBox {
   position: absolute;
   top: 0px;

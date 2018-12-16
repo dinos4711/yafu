@@ -60,4 +60,16 @@ public class Devices extends TreeSet<Device> {
     }
     return devicesWithReadings;
   }
+
+  public Set<Device> getSwitchDevices() {
+    Set<Device> devices = new TreeSet<>();
+
+    for (Device device : this) {
+      if (device.getSetters().get("on") != null && device.getSetters().get("off") != null && device.getReadings().contains("state")) {
+        devices.add(device);
+      }
+    }
+
+    return devices;
+  }
 }

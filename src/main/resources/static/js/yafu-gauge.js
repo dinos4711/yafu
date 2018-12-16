@@ -441,6 +441,8 @@ function drawGauge(gauge) {
 
       if (gauge.values[i].active) {
         drawSmallPiePiece(gauge.context, pos, gauge.radius * 0.6, gauge.radius * 0.9, '#808080', 240 / (gauge.values.length * 2 - 1));
+      } else {
+        drawSmallPiePiece(gauge.context, pos, gauge.radius * 0.6, gauge.radius * 0.9, '#383838', 240 / (gauge.values.length * 2 - 1));
       }
 
     }
@@ -524,7 +526,7 @@ function drawHandAndValue(gauge, angle, value, color, lineWidth) {
 }
 
 
-class GaugeDialog {
+class AddNewGaugeDialog {
 
   constructor() {
     var dialogContent = '\
@@ -555,14 +557,14 @@ class GaugeDialog {
       </table>';
 
     var divElement = document.createElement("div");
-    divElement.id="gaugeDialog";
+    divElement.id="addNewGaugeDialog";
     divElement.title="New Gauge";
     divElement.innerHTML = dialogContent;
     document.body.appendChild(divElement);
 
     var _this = this;
 
-    this.dialog = $( "#gaugeDialog" ).dialog({
+    this.dialog = $( "#addNewGaugeDialog" ).dialog({
       width: 650,
       height: 350,
       modal: true,

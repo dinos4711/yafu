@@ -165,6 +165,20 @@ public class FhemController {
       return names.toString();
     }
 
+    if ("getDevicesWithSwitches".equals(cmd)) {
+      devices = getDevices();
+      Set<Device> switchDevices = devices.getSwitchDevices();
+      JSONArray jsonDevices = new JSONArray();
+      for (Device switchDevice : switchDevices) {
+        JSONObject jsonDevice = new JSONObject();
+        jsonDevice.put("deviceName", switchDevice.getName());
+        jsonDevice.put("displayName", switchDevice.getDisplayName());
+
+        jsonDevices.put(jsonDevice);
+      }
+      return jsonDevices.toString();
+    }
+
     if ("getDevicesWithSliders".equals(cmd) || "getDevicesWithGauges".equals(cmd) || "getDevicesWithTimerButtons".equals(cmd)) {
       devices = getDevices();
       JSONArray jsonDevices = new JSONArray();

@@ -177,7 +177,7 @@ class YafuSlider {
 
 }
 
-class SliderDialog {
+class AddNewSliderDialog {
 
   constructor() {
     var dialogContent = '\
@@ -202,14 +202,14 @@ class SliderDialog {
       </table>';
 
     var divElement = document.createElement("div");
-    divElement.id="sliderDialog";
+    divElement.id="addNewSliderDialog";
     divElement.title="New Slider";
     divElement.innerHTML = dialogContent;
     document.body.appendChild(divElement);
 
     var _this = this;
 
-    this.dialog = $( "#sliderDialog" ).dialog({
+    this.dialog = $( "#addNewSliderDialog" ).dialog({
       width: 650,
       height: 350,
       modal: true,

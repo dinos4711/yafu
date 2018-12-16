@@ -2,10 +2,12 @@ var config = {};
 var gridSize = 5;
 
 var allCells = new Array();
-var sliderDialog;
-var readingDialog;
-var gaugeDialog;
-var timerButtonDialog;
+
+var addNewSliderDialog;
+var addNewReadingDialog;
+var addNewGaugeDialog;
+var addNewTimerButtonDialog;
+var addNewSwitchDialog;
 
 var mainDialog;
 var addPageDialog;
@@ -273,27 +275,32 @@ function createMainDialog(data) {
 
     $('#menu_add_new_gauge').click(function(){
         mainDialog.dialog( "close");
-        gaugeDialog.open();
+        addNewGaugeDialog.open();
     });
 
     $('#menu_add_new_slider').click(function(){
         mainDialog.dialog( "close");
-        sliderDialog.open();
+        addNewSliderDialog.open();
     });
 
     $('#menu_add_new_gauge').click(function(){
         mainDialog.dialog( "close");
-        gaugeDialog.open();
+        addNewGaugeDialog.open();
     });
 
     $('#menu_add_new_timer_button').click(function(){
         mainDialog.dialog( "close");
-        timerButtonDialog.open();
+        addNewTimerButtonDialog.open();
     });
 
     $('#menu_add_new_reading').click(function(){
         mainDialog.dialog( "close");
-        readingDialog.open();
+        addNewReadingDialog.open();
+    });
+
+    $('#menu_add_new_switch').click(function(){
+        mainDialog.dialog( "close");
+        addNewSwitchDialog.open();
     });
 
 }
@@ -518,6 +525,9 @@ function buildModel(modelString) {
       } else if (cell.type == "TimerButton") {
         var timerButton = new YafuTimerButton(cell, false);
         allCells.push(timerButton);
+      } else if (cell.type == "Switch") {
+        var toggleButton = new YafuSwitch(cell, false);
+        allCells.push(toggleButton);
       } else {
         addCell(cell.id, cell.name, false);
         cellElement = $("div[ui-uuid=" + cell.id + "]");
@@ -721,10 +731,11 @@ $(document).ready(function() {
      width:"auto"
   });
 
-  sliderDialog      = new SliderDialog();
-  readingDialog     = new ReadingDialog();
-  gaugeDialog       = new GaugeDialog();
-  timerButtonDialog = new TimerButtonDialog();
+  addNewSliderDialog      = new AddNewSliderDialog();
+  addNewReadingDialog     = new AddNewReadingDialog();
+  addNewGaugeDialog       = new AddNewGaugeDialog();
+  addNewTimerButtonDialog = new AddNewTimerButtonDialog();
+  addNewSwitchDialog      = new AddNewSwitchDialog();
 
   var htmlCanvas = document.getElementById('backgroundCanvas');
   $( "#backgroundCanvas" ).contextmenu(function(evt) {

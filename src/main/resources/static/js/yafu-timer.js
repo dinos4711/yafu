@@ -497,7 +497,7 @@ class AddNewTimerDialog {
     }
 }
 
-class TimerButtonDialog {
+class AddNewTimerButtonDialog {
 
   constructor() {
     var dialogContent = '\
@@ -520,14 +520,14 @@ class TimerButtonDialog {
       </table>';
 
     var divElement = document.createElement("div");
-    divElement.id="timerButtonDialog";
+    divElement.id="addNewTimerButtonDialog";
     divElement.title="New TimerButton";
     divElement.innerHTML = dialogContent;
     document.body.appendChild(divElement);
 
     var thisTimerButtonDialog = this;
 
-    this.dialog = $( "#timerButtonDialog" ).dialog({
+    this.dialog = $( "#addNewTimerButtonDialog" ).dialog({
       width: 650,
       height: 350,
       modal: true,
