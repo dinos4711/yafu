@@ -9,7 +9,7 @@ class YafuSwitch {
     this.cell = cell;
 
     var myContent = '\
-        <input type="checkbox" id="' + this.cell.id + '" >\
+        <div class="icon" id="' + this.cell.id + '"></div>\
        	<div label-id="' + this.cell.id + '" class="editable" style="position: absolute; top: 0px; left: 100px">' + this.cell.name + '</div>\
     ';
 
@@ -85,49 +85,42 @@ class YafuSwitch {
       }
     });
 
-    this.mySwitch = $("div[ui-uuid=" + this.cell.id + "]");
+    this.mySwitch = $("#" + this.cell.id).famultibutton({
+		offColor: '#2A2A2A',
+		offBackgroundColor: '#808080',
+		onColor: '#2A2A2A',
+		onBackgroundColor: '#aa6900',
 
-    this.mySwitch = new DG.OnOffSwitch({
-        el: '#' + _this.cell.id,
-        textOn:'AN',
-        textOff:'AUS',
-        listener:function(name, checked){
+        mode: 'toggle',
+        toggleOn: function() {
             if (config.mode == 'edit') {
+                _this.mySwitch.setOff();
                 return;
             }
-            var state = checked ? 'on' : 'off';
-
-            console.log("Listener " + _this.cell.device + " -> " + state + " (" + _this.myReading + ")");
-
-            if (state != _this.myReading) {
-                console.log("User switched " + state);
-                var cmd = 'set ' + _this.cell.device + ' ' + state;
-                sendCommandToFhem(cmd);
+            var cmd = 'set ' + _this.cell.device + ' on';
+            sendCommandToFhem(cmd);
+        },
+        toggleOff: function() {
+            if (config.mode == 'edit') {
+                _this.mySwitch.setOn();
+                return;
             }
-        }
+            var cmd = 'set ' + _this.cell.device + ' off';
+            sendCommandToFhem(cmd);
+        },
+        valueChanged: function(data) {
+            console.log(data);
+        },
     });
-
-    this.myReading = this.mySwitch.getValue() ? "on" : "off";
-    console.log("Initially " + this.cell.device + " -> " + this.myReading);
 
     getDeviceReading(this.cell.device, 'state', function(response, yafuSwitch) {
         var value = response.Results[0].Readings['state'].Value;
-        console.log("First update " + _this.cell.device + " -> " + value);
-
-        if (value != _this.myReading) {
-            _this.myReading = value;
-            if (value == 'on') {
-                if (!_this.mySwitch.getValue()) {
-                    _this.mySwitch.check();
-                }
-
-            } else {
-                if (_this.mySwitch.getValue()) {
-                    _this.mySwitch.uncheck();
-                }
-            }
+        if (value == 'on') {
+          _this.mySwitch.setOn();
         }
-
+        if (value == 'off') {
+          _this.mySwitch.setOff();
+        }
     }, this);
 
     $("button[id=button-close-" + this.cell.id + "]").button({
@@ -143,18 +136,11 @@ class YafuSwitch {
     var myReading = this.cell.device + '-state';
 
     if (myReading == deviceReading) {
-      // TODO: change the button state
-      console.log("Update " + this.cell.device + " -> " + value);
-//      $('#' + this.cell.id).prop("checked", value == 'on');
-      if (value == 'on') {
-            if (!this.mySwitch.getValue()) {
-                this.mySwitch.check();
-            }
-
-        } else {
-            if (this.mySwitch.getValue()) {
-                this.mySwitch.uncheck();
-            }
+        if (value == 'on') {
+          this.mySwitch.setOn();
+        }
+        if (value == 'off') {
+          this.mySwitch.setOff();
         }
 
     }
