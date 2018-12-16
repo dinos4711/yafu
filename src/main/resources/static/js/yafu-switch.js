@@ -64,18 +64,6 @@ class YafuSwitch {
         _this.cell.size = { width: $(this).width(), height: $(this).height() };
         sendCellToServer(_this.cell);
       }
-    }).resizable({
-        grid: [ gridSize, gridSize ],
-        resize: function( event, ui ) {
-          $("#infoBox").text(ui.size.width + ' x ' + ui.size.height);
-        },
-        stop: function( event, ui ) {
-          $("div[label-id=" + _this.cell.id + "]").text(_this.cell.name);
-          $("#infoBox").text("");
-          _this.cell.position = ui.position;
-          _this.cell.size = ui.size;
-          sendCellToServer(_this.cell);
-        }
     });
 
     $("div[label-id=" + this.cell.id + "]").draggable({
@@ -107,9 +95,6 @@ class YafuSwitch {
             }
             var cmd = 'set ' + _this.cell.device + ' off';
             sendCommandToFhem(cmd);
-        },
-        valueChanged: function(data) {
-            console.log(data);
         },
     });
 
