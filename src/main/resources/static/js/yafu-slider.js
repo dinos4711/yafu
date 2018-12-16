@@ -54,7 +54,7 @@ class YafuSlider {
     }
     $("div[draggable-id=" + this.cell.id + "]").css({top: this.cell.position.top, left: this.cell.position.left, width: this.cell.size.width, height: this.cell.size.height});
 
-    $("div[draggable-id=" + this.cell.id + "]").draggable({
+    this.myDraggable = $("div[draggable-id=" + this.cell.id + "]").draggable({
       containment: "document",
       snap: false,
       snapTolerance: 5,
@@ -102,7 +102,7 @@ class YafuSlider {
         }
     });
 
-    $("div[label-id=" + this.cell.id + "]").draggable({
+    this.myLabel = $("div[label-id=" + this.cell.id + "]").draggable({
       stop: function( event, ui ) {
         _this.cell.labelPosition = $(this).position();
         sendCellToServer(_this.cell);
@@ -113,7 +113,7 @@ class YafuSlider {
 
     this.mySlider = $("div[ui-uuid=" + this.cell.id + "]");
 
-    this.mySlider.slider({
+    this.mySlider = this.mySlider.slider({
       min : 0,
       max : _this.values.length - 1,
       create: function() {
@@ -159,6 +159,19 @@ class YafuSlider {
       sendRemoveCellToServer(_this.cell.id);
       $("div[draggable-id=" + _this.cell.id + "]").remove();
     });
+  }
+
+  setEnabled(enabled) {
+      console.log("Setting " + (enabled ? "enabled" : "disabled"));
+      this.myDraggable.on("mouseover", function() {
+        $(this).css('cursor', enabled ? 'default' : 'move');
+      });
+//      this.mySlider.on("mouseover", function() {
+//        $(this).css('cursor', enabled ? 'pointer' : 'move');
+//      });
+      this.myLabel.on("mouseover", function() {
+        $(this).css('cursor', enabled ? 'default' : 'move');
+      });
   }
 
   inform(deviceSetter, value) {
