@@ -31,7 +31,7 @@ class YafuClock {
     canvas.width = this.cell.size.width;
     canvas.height = this.cell.size.height;
 
-    $("div[draggable-id=" + this.cell.id + "]").draggable({
+    this.myDraggable = $("div[draggable-id=" + this.cell.id + "]").draggable({
       containment: "document",
       snap: false,
       snapTolerance: 5,
@@ -95,6 +95,14 @@ class YafuClock {
     });
 
     startClock(this);
+  }
+
+  setEnabled(enabled) {
+      console.log("Setting " + (enabled ? "enabled" : "disabled"));
+      var cursor = enabled ? 'default' : 'move';
+      this.myDraggable.on("mouseover", function() {
+        $(this).css('cursor', cursor);
+      });
   }
 
   inform(deviceReading, value) {
