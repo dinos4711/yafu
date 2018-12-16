@@ -66,7 +66,7 @@ class YafuSwitch {
       }
     });
 
-    $("div[label-id=" + this.cell.id + "]").draggable({
+    this.myLabel = $("div[label-id=" + this.cell.id + "]").draggable({
       stop: function( event, ui ) {
         _this.cell.labelPosition = $(this).position();
         sendCellToServer(_this.cell);
@@ -115,6 +115,17 @@ class YafuSwitch {
       sendRemoveCellToServer(_this.cell.id);
       $("div[draggable-id=" + _this.cell.id + "]").remove();
     });
+  }
+
+  setEnabled(enabled) {
+      console.log("Setting " + (enabled ? "enabled" : "disabled"));
+      var cursor = enabled ? 'pointer' : 'move';
+      this.mySwitch.on("mouseover", function() {
+        $(this).css('cursor', cursor);
+      });
+      this.myLabel.on("mouseover", function() {
+        $(this).css('cursor', cursor);
+      });
   }
 
   inform(deviceReading, value) {

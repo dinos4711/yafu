@@ -43,7 +43,7 @@ class YafuReading {
 
     $("div[ui-uuid=" + _this.cell.id + "]").tooltip();
 
-    $("div[draggable-id=" + this.cell.id + "]").draggable({
+    this.myDraggable = $("div[draggable-id=" + this.cell.id + "]").draggable({
       containment: "document",
       snap: false,
       snapTolerance: 5,
@@ -78,20 +78,6 @@ class YafuReading {
         _this.cell.size = { width: $(this).width(), height: $(this).height() };
         sendCellToServer(_this.cell);
       }
-    }).resizable({
-        minWidth: 10,
-        minHeight: 10,
-        grid: [ gridSize, gridSize ],
-        resize: function( event, ui ) {
-          $("#infoBox").text(ui.size.width + ' x ' + ui.size.height);
-        },
-        stop: function( event, ui ) {
-          $("div[ui-uuid=" + _this.cell.id + "]").text(_this.lastReading);
-          $("#infoBox").text("");
-          _this.cell.position = ui.position;
-          _this.cell.size = ui.size;
-          sendCellToServer(_this.cell);
-        }
     });
 
     getDeviceReading(this.cell.device, this.cell.reading, function(response, yafuReading) {
@@ -104,6 +90,14 @@ class YafuReading {
 
   openSettings() {
 
+  }
+
+  setEnabled(enabled) {
+      console.log("Setting " + (enabled ? "enabled" : "disabled"));
+      var cursor = enabled ? 'default' : 'move';
+      this.myDraggable.on("mouseover", function() {
+        $(this).css('cursor', cursor);
+      });
   }
 
   inform(deviceReading, value) {

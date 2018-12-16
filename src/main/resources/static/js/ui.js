@@ -123,6 +123,13 @@ function updateEditMode() {
       }
     });
 
+    for (var i in allCells) {
+        var oneCell = allCells[i];
+        if (typeof oneCell.setEnabled === 'function') {
+            oneCell.setEnabled(config.mode == 'view');
+        }
+
+    }
 }
 
 function initDialogs() {

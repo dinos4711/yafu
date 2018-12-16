@@ -85,7 +85,7 @@ class YafuTimerButton {
         });
 
         if (cell.withLabel) {
-            $("div[label-id=" + this.cell.id + "]").draggable({
+            this.myLabel = $("div[label-id=" + this.cell.id + "]").draggable({
                 stop: function( event, ui ) {
                     thisYafuTimerButton.cell.labelPosition = $(this).position();
                     sendCellToServer(thisYafuTimerButton.cell);
@@ -99,6 +99,21 @@ class YafuTimerButton {
                 new TimersDialog(thisYafuTimerButton.cell);
             }
         });
+    }
+
+    setEnabled(enabled) {
+        console.log("Setting " + (enabled ? "enabled" : "disabled"));
+        var cursor = enabled ? 'pointer' : 'move';
+
+        this.myButton.on("mouseover", function() {
+          $(this).css('cursor', cursor);
+        });
+
+        if (this.cell.withLabel) {
+            this.myLabel.on("mouseover", function() {
+              $(this).css('cursor', cursor);
+            });
+        }
     }
 
     inform(deviceSetter, value) {
