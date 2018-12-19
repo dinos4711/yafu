@@ -35,10 +35,7 @@
 
             });
 
-            this._getContent();
 
-            console.log(this);
-            console.log(this.options.contentCommand);
         },
 
         _updateContent: function(devicesString) {
@@ -81,17 +78,23 @@
                 }
 
             });
+        },
+
+        update: function() {
+            this._getContent();
         }
     });
 
 }( jQuery ));
 
 //$(document).ready(function() {
-//    $( "#deviceSelector" ).deviceSelector({
+//    var selector = $( "#deviceSelector" ).deviceSelector({
 //        value: 20,
 //        contentCommand: "getDevicesWithGauges",
 //        selectionChanged: function(evt, data) {
 //            console.log(data);
 //        }
 //    });
+//
+//    selector.deviceSelector("update");
 //});
