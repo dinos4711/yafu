@@ -163,7 +163,6 @@ class YafuGauge {
   }
 
   setEnabled(enabled) {
-      console.log("Setting " + (enabled ? "enabled" : "disabled"));
       var cursor = enabled ? 'pointer' : 'move';
       this.myDraggable.on("mouseover", function() {
         $(this).css('cursor', cursor);

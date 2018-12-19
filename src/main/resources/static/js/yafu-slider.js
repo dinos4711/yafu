@@ -162,13 +162,9 @@ class YafuSlider {
   }
 
   setEnabled(enabled) {
-      console.log("Setting " + (enabled ? "enabled" : "disabled"));
       this.myDraggable.on("mouseover", function() {
         $(this).css('cursor', enabled ? 'default' : 'move');
       });
-//      this.mySlider.on("mouseover", function() {
-//        $(this).css('cursor', enabled ? 'pointer' : 'move');
-//      });
       this.myLabel.on("mouseover", function() {
         $(this).css('cursor', enabled ? 'default' : 'move');
       });

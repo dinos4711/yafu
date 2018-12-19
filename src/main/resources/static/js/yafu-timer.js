@@ -102,7 +102,6 @@ class YafuTimerButton {
     }
 
     setEnabled(enabled) {
-        console.log("Setting " + (enabled ? "enabled" : "disabled"));
         var cursor = enabled ? 'pointer' : 'move';
 
         this.myButton.on("mouseover", function() {

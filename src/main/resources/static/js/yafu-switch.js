@@ -118,7 +118,6 @@ class YafuSwitch {
   }
 
   setEnabled(enabled) {
-      console.log("Setting " + (enabled ? "enabled" : "disabled"));
       var cursor = enabled ? 'pointer' : 'move';
       this.mySwitch.on("mouseover", function() {
         $(this).css('cursor', cursor);

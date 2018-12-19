@@ -93,7 +93,6 @@ class YafuReading {
   }
 
   setEnabled(enabled) {
-      console.log("Setting " + (enabled ? "enabled" : "disabled"));
       var cursor = enabled ? 'default' : 'move';
       this.myDraggable.on("mouseover", function() {
         $(this).css('cursor', cursor);
