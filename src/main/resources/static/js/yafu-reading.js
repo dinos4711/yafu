@@ -12,7 +12,9 @@ class YafuReading {
         <div ui-uuid="' + this.cell.id + '" title="' + this.cell.name + ' : ' + this.cell.reading + '" yafu-inform="' + this.cell.device + '-' + this.cell.reading + '" style="text-align: center;">\
           ?\
         </div>\
-        <i icon-id="' + this.cell.id + '" class="' + this.cell.icon + '"></i>\
+        <div icon-id="' + this.cell.id + '" class="reading-wrapper">\
+          <i class="' + this.cell.icon + '"></i>\
+        </div>\
     ';
 
     var cellElement = document.createElement("div");
@@ -42,9 +44,30 @@ class YafuReading {
         }
     });
 
-    $("i[icon-id=" + _this.cell.id + "]").draggable();
-
     $("div[ui-uuid=" + _this.cell.id + "]").tooltip();
+
+    if (this.cell.iconPosition) {
+      $("div[icon-id=" + this.cell.id + "]").css({top: this.cell.iconPosition.top, left: this.cell.iconPosition.left});
+    }
+
+    $("div[icon-id=" + _this.cell.id + "]").draggable({
+      drag: function( event, ui ) {
+        var myTop  = Math.round(parseFloat($(this).position().top)  / gridSize) * gridSize;
+        var myLeft = Math.round(parseFloat($(this).position().left) / gridSize) * gridSize;
+        $(this).css({top: myTop, left: myLeft});
+
+        $("#infoBox").text(myLeft + ' , ' + myTop);
+      },
+      stop: function( event, ui ) {
+        var myTop  = Math.round(parseFloat($(this).position().top)  / gridSize) * gridSize;
+        var myLeft = Math.round(parseFloat($(this).position().left) / gridSize) * gridSize;
+        $(this).css({top: myTop, left: myLeft});
+
+        $("#infoBox").text("");
+        _this.cell.iconPosition = $(this).position();
+        sendCellToServer(_this.cell);
+      }
+    });
 
     this.myDraggable = $("div[draggable-id=" + this.cell.id + "]").draggable({
       containment: "document",

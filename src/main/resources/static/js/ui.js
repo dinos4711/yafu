@@ -747,7 +747,6 @@ $(document).ready(function() {
   addNewSwitchDialog      = new AddNewSwitchDialog();
 
   document.addEventListener('contextmenu', function(evt) {
-    console.log(evt);
     mainDialog.mouse = {"x": evt.clientX, "y": evt.clientY};
     $("#mainDialog").css('z-index', 9999);
     mainDialog.dialog( "open" );
