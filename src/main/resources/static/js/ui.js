@@ -747,9 +747,12 @@ $(document).ready(function() {
   addNewSwitchDialog      = new AddNewSwitchDialog();
 
   document.addEventListener('contextmenu', function(evt) {
-    mainDialog.mouse = {"x": evt.clientX, "y": evt.clientY};
-    $("#mainDialog").css('z-index', 9999);
-    mainDialog.dialog( "open" );
+    console.log(evt);
+    if (evt.target.localName == 'body') {
+      mainDialog.mouse = {"x": evt.clientX, "y": evt.clientY};
+      $("#mainDialog").css('z-index', 9999);
+      mainDialog.dialog( "open" );
+    }
   }, false);
 
 
