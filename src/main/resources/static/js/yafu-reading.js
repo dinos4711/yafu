@@ -12,6 +12,7 @@ class YafuReading {
         <div ui-uuid="' + this.cell.id + '" title="' + this.cell.name + ' : ' + this.cell.reading + '" yafu-inform="' + this.cell.device + '-' + this.cell.reading + '" style="text-align: center;">\
           ?\
         </div>\
+        <i icon-id="' + this.cell.id + '" class="' + this.cell.icon + '"></i>\
     ';
 
     var cellElement = document.createElement("div");
@@ -40,6 +41,8 @@ class YafuReading {
             readableContextMenuDialog.dialog( "open");
         }
     });
+
+    $("i[icon-id=" + _this.cell.id + "]").draggable();
 
     $("div[ui-uuid=" + _this.cell.id + "]").tooltip();
 
@@ -132,7 +135,14 @@ class AddNewReadingDialog {
                     </select>\
                 </td>\
             </tr>\
-        </table>';
+            <tr>\
+                <td><label for="readingDialogSelectIcon">Icon</label></td>\
+                <td>\
+                    <input id="readingDialogSelectIcon" class="form-control icp icp-auto" value="" type="text"/>\
+                </td>\
+            </tr>\
+        </table>\
+        ';
 
       var divElement = document.createElement("div");
       divElement.id="addNewReadingDialog";
@@ -142,9 +152,14 @@ class AddNewReadingDialog {
 
       var _this = this;
 
+      $('#readingDialogSelectIcon').iconpicker();
+      $('#readingDialogSelectIcon').on('iconpickerSelected', function(event){
+        _this.selectedIcon = event.iconpickerValue;
+      });
+
       this.dialog = $( "#addNewReadingDialog" ).dialog({
         width: 650,
-        height: 350,
+        height: 450,
         modal: true,
         autoOpen: false,
         buttons: {
@@ -199,6 +214,8 @@ class AddNewReadingDialog {
           _this.selectedReading = data.item.element.attr("reading");
         }
       });
+
+
     }
 
   addNewReading(foundDevice, foundReading) {
@@ -208,6 +225,7 @@ class AddNewReadingDialog {
         name: this.selectedDeviceName,
         device: this.selectedDevice,
         reading: this.selectedReading,
+        icon: this.selectedIcon,
         position: { left: mainDialog.mouse.x, top: mainDialog.mouse.y }
     };
 

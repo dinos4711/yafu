@@ -721,6 +721,8 @@ function refreshDraggable(sendToServer = false) {
 // prepare the form when the DOM is ready
 $(document).ready(function() {
 
+  $('.icp-auto').iconpicker();
+
   // Setup the ajax indicator
   $('body').append('<div id="ajaxBusy"><p><img src="images/ajax-loader.gif"></p></div>');
   $("body").attr("generated", new Date().getTime());
@@ -744,12 +746,13 @@ $(document).ready(function() {
   addNewTimerButtonDialog = new AddNewTimerButtonDialog();
   addNewSwitchDialog      = new AddNewSwitchDialog();
 
-  var htmlCanvas = document.getElementById('backgroundCanvas');
-  $( "#backgroundCanvas" ).contextmenu(function(evt) {
-    mainDialog.mouse = {"x": evt.originalEvent.clientX, "y": evt.originalEvent.clientY};
+  document.addEventListener('contextmenu', function(evt) {
+    console.log(evt);
+    mainDialog.mouse = {"x": evt.clientX, "y": evt.clientY};
     $("#mainDialog").css('z-index', 9999);
     mainDialog.dialog( "open" );
-  });
+  }, false);
+
 
   document.oncontextmenu=RightMouseDown;
   function RightMouseDown() {
@@ -762,91 +765,8 @@ $(document).ready(function() {
 
   getUIContent();
 
-  playWithCanvas();
 
 });
-
-function playWithCanvas() {
-    var posX;
-    var posY;
-    var dirX;
-    var dirY;
-    var maxSteps;
-    var step;
-    var context;
-
-    var htmlCanvas = document.getElementById('backgroundCanvas');
-
-    initialize();
-
-    function initialize() {
-      window.addEventListener('resize', resizeCanvas, false);
-      resizeCanvas();
-    }
-
-    function redraw() {
-      // Store the current transformation matrix
-      context.save();
-      // Use the identity matrix while clearing the canvas
-      context.setTransform(1, 0, 0, 1, 0, 0);
-      context.clearRect(0, 0, htmlCanvas.width, htmlCanvas.height);
-      // Restore the transform
-      context.restore();
-
-      context.fillStyle="#007700";
-      context.fillRect(posX, posY, 1, 1);
-
-      check();
-      setTimeout(redraw, 30);
-    }
-
-    function check() {
-      step++;
-      if (step > maxSteps) {
-        step = 1;
-        maxSteps = Math.floor(Math.random() * 50) + 10;
-        dirX = Math.floor(Math.random() * 5) - 2;
-        dirY = Math.floor(Math.random() * 5) - 2;
-      }
-
-      posX = posX + dirX;
-      posY = posY + dirY;
-
-      if (posX > htmlCanvas.width - 1) {
-        dirX = -dirX;
-        posX = htmlCanvas.width - 1;
-      }
-      if (posX < 0) {
-        dirX = -dirX;
-        posX = 0;
-      }
-      if (posY > htmlCanvas.height - 1) {
-        dirY = -dirY;
-        posY = htmlCanvas.height - 1;
-      }
-      if (posY < 0) {
-        dirY = -dirY;
-        posY = 0;
-      }
-
-    }
-
-    function resizeCanvas() {
-      context = htmlCanvas.getContext('2d');
-      htmlCanvas.width = window.innerWidth;
-      htmlCanvas.height = window.innerHeight;
-
-      posX = htmlCanvas.width / 2;
-      posY = htmlCanvas.height / 2;
-      dirX = Math.floor(Math.random() * 5) - 2;
-      dirY = Math.floor(Math.random() * 5) - 2;
-      maxSteps = Math.floor(Math.random() * 50) + 10;
-      step = 1;
-
-      //redraw();
-    }
-
-}
 
 var fhemToken = null;
 

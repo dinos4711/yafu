@@ -9,15 +9,19 @@
     <link rel="stylesheet" href="css/jquery.toast.css">
     <link rel="stylesheet" href="css/ui.css">
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
 
     <!--<script src="js/jquery.ui.touch-punch.min.js"></script>-->
     <script src="js/jquery.toast.js"></script>
     <script src="js/moment.min.js"></script>
 
     <script type="text/javascript" src="js/fa-multi-button.js"></script>
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+    <link href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" rel="stylesheet">
+
+    <link href="css/fontawesome-iconpicker.css" rel="stylesheet">
+    <script src="js/fontawesome-iconpicker.min.js"></script>
 
     <script src="js/fhemweb.js"></script>
     <script src="js/ui.js"></script>
@@ -30,28 +34,26 @@
     <script src="js/yafu-switch.js"></script>
     <script src="js/yafu-tools.js"></script>
 
-    <style>
-      fieldset {
-          padding: 1em;
-          font:80%/1 sans-serif;
-      }
-      label {
-          float:left;
-          width:25%;
-          margin-right:0.5em;
-          padding-top:0.2em;
-          text-align:right;
-          font-weight:bold;
-      }
-      input.text {
-          margin-bottom:12px; width:55%; padding: .4em;
-      }
-    </style>
+    <!--<style>-->
+      <!--fieldset {-->
+          <!--padding: 1em;-->
+          <!--font:80%/1 sans-serif;-->
+      <!--}-->
+      <!--label {-->
+          <!--float:left;-->
+          <!--width:25%;-->
+          <!--margin-right:0.5em;-->
+          <!--padding-top:0.2em;-->
+          <!--text-align:right;-->
+          <!--font-weight:bold;-->
+      <!--}-->
+      <!--input.text {-->
+          <!--margin-bottom:12px; width:55%; padding: .4em;-->
+      <!--}-->
+    <!--</style>-->
 
 </head>
 <body style="background-color: #2a2a2a">
-
-<canvas id="backgroundCanvas" style = "position: absolute; left: 0px; top: 0px;"></canvas>
 
 <div id="uicontainer">
 
@@ -65,8 +67,12 @@
 
 </div>
 
-<script>
+<!--<input class="form-control icp icp-auto" value="fas fa-anchor" type="text"/>-->
 
+<script>
+    $(function () {
+        $('.icp-auto').iconpicker();
+    });
 </script>
 
 </body>
