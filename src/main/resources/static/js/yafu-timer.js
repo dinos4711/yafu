@@ -251,16 +251,8 @@ class AddNewTimerDialog {
         var thisAddNewTimerDialog = this;
 
       var myContent = '\
-        <p>Select a setter, a value and enter a relative time</p>\
+        <p>Select a value and enter a relative time</p>\
         <table>\
-            <tr>\
-                <td><label for="addNewTimerDialogSelectSetter">Setter</label></td>\
-                <td>\
-                    <select id="addNewTimerDialogSelectSetter">\
-                        <option>Please wait ...</option>\
-                    </select>\
-                </td>\
-            </tr>\
             <tr>\
                 <td><label for="addNewTimerDialogSelectSetterValue">Value</label></td>\
                 <td>\
@@ -277,7 +269,7 @@ class AddNewTimerDialog {
 
         var cellElement = document.createElement("div");
         cellElement.id="newTimerDialog";
-        cellElement.title="New Timer for " + cell.name;
+        cellElement.title="New Timer for " + cell.name + " and " + cell.setter;
         cellElement.innerHTML = myContent;
         document.getElementById("uicontainer").appendChild(cellElement);
 
@@ -327,17 +319,7 @@ class AddNewTimerDialog {
             }
         });
 
-        $( "#addNewTimerDialogSelectSetter" ).selectmenu({
-            width: 450,
-            create: function() {
-                thisAddNewTimerDialog.getSetters();
-            },
-            change: function( event, data ) {
-                thisAddNewTimerDialog.selectedSetter = data.item.element.attr("setter");
-                thisAddNewTimerDialog.updateValues();
-
-            }
-        });
+        this.updateValues();
 
         $( "#addNewTimerDialogSelectSetterValue" ).selectmenu({
             width: 450,
@@ -349,62 +331,10 @@ class AddNewTimerDialog {
 
     }
 
-    getSetters() {
-
-        var thisAddNewTimerDialog = this;
-
-        $.ajax({
-            type: "GET",
-            url: "getDeviceSetters",
-            data: {
-                device: this.cell.device,
-                XHR: "1"
-            },
-            success: function(data) {
-                thisAddNewTimerDialog.updateSetters(data);
-            }
-
-        });
-    }
-
-    updateSetters(data) {
-        var thisAddNewTimerDialog = this;
-
-        this.setters = JSON.parse(data);
-
-        var setters = this.setters;
-
-        var selectSetterDOM = document.getElementById("addNewTimerDialogSelectSetter");
-        selectSetterDOM.innerHTML = "";
-
-        var isFirst = 1;
-        for (var i in setters) {
-            for (var setterName in setters[i]) {
-                var optionDiv = document.createElement("option");
-                optionDiv.innerHTML = setterName;
-                optionDiv.setAttribute("setter", setterName);
-                selectSetterDOM.appendChild(optionDiv);
-                if (isFirst == 1) {
-                    isFirst = 0;
-                    this.selectedSetter = setterName;
-                }
-            }
-        }
-
-        $( "#addNewTimerDialogSelectSetter" ).selectmenu( "refresh" );
-
-        this.updateValues();
-    }
-
     updateValues() {
         var thisAddNewTimerDialog = this;
 
-        var setterName = this.selectedSetter;
-
-        var foundSetter = this.setters.find(function(element) {
-            return typeof element[setterName] != 'undefined';
-        });
-        var valuesString = foundSetter[setterName];
+        var valuesString = this.cell.values;
 
         var values = valuesString.split(',');
         if (values[0] == 'slider') {
@@ -515,7 +445,7 @@ class AddNewTimerButtonDialog {
 
   constructor() {
     var dialogContent = '\
-      <p>Select a device</p>\
+      <p>Select a device and a device setter</p>\
       <table>\
           <tr>\
               <td><label for="timerButtonDialogSelectDevice">Device</label></td>\
@@ -526,7 +456,15 @@ class AddNewTimerButtonDialog {
               </td>\
           </tr>\
           <tr>\
-              <td><label for="timerButtonDialogOnlyIntegers">With label</label></td>\
+              <td><label for="timerButtonDialogSelectSetter">Setter</label></td>\
+              <td>\
+                  <select id="timerButtonDialogSelectSetter">\
+                      <option>Please wait ...</option>\
+                  </select>\
+              </td>\
+          </tr>\
+          <tr>\
+              <td><label for="timerButtonDialogWithLabel">With label</label></td>\
               <td>\
                   <input type="checkbox" name="checkbox-with-label" id="timerButtonDialogWithLabel">\
               </td>\
@@ -535,7 +473,7 @@ class AddNewTimerButtonDialog {
 
     var divElement = document.createElement("div");
     divElement.id="addNewTimerButtonDialog";
-    divElement.title="New TimerButton";
+    divElement.title="New Timer Button";
     divElement.innerHTML = dialogContent;
     document.body.appendChild(divElement);
 
@@ -548,9 +486,16 @@ class AddNewTimerButtonDialog {
       autoOpen: false,
       buttons: {
         Ok: function() {
+          var foundDevice = thisTimerButtonDialog.jsonDevices.find(function(element) {
+            return element.deviceName == thisTimerButtonDialog.selectedDevice;
+          });
+          var foundSetter = foundDevice.setters.find(function(element) {
+            return typeof element[thisTimerButtonDialog.selectedSetter] != 'undefined';
+          });
+          var values = foundSetter[thisTimerButtonDialog.selectedSetter];
           var withLabel = document.getElementById("timerButtonDialogWithLabel").checked;
           $( this ).dialog( "close" );
-          thisTimerButtonDialog.addNewTimerButton(withLabel);
+          thisTimerButtonDialog.addNewTimerButton(values, withLabel);
         }
       }
     });
@@ -560,19 +505,52 @@ class AddNewTimerButtonDialog {
       change: function( event, data ) {
         thisTimerButtonDialog.selectedDevice = data.item.element.attr("fhem-device");
         thisTimerButtonDialog.selectedDeviceName = data.item.element.attr("fhem-deviceName");
+
+        var selectSetterDOM = document.getElementById("timerButtonDialogSelectSetter");
+        selectSetterDOM.innerHTML = "";
+
+        var foundDevice = thisTimerButtonDialog.jsonDevices.find(function(element) {
+          return element.deviceName == thisTimerButtonDialog.selectedDevice;
+        });
+
+        var setters = foundDevice.setters;
+        var isFirst = 1;
+        for (var i in setters) {
+          for (var setterName in setters[i]) {
+            var option = document.createElement("option");
+            option.setAttribute("setter", setterName);
+            option.innerHTML = setterName;
+
+            selectSetterDOM.options.add(option);
+            if (isFirst == 1) {
+              isFirst = 0;
+              thisTimerButtonDialog.selectedSetter = setterName;
+            }
+          }
+        }
+        $( "#timerButtonDialogSelectSetter" ).selectmenu( "refresh" );
+
       }
     });
 
+    $( "#timerButtonDialogSelectSetter" ).selectmenu({
+      width: 450,
+      change: function( event, data ) {
+        thisTimerButtonDialog.selectedSetter = data.item.element.attr("setter");
+      }
+    });
   }
 
-  addNewTimerButton(withLabel) {
+  addNewTimerButton(valuesString, withLabel) {
     var cell = {
         type: "TimerButton",
         id: uuidv4(),
         name: this.selectedDeviceName,
         device: this.selectedDevice,
-        position: { left: mainDialog.mouse.x, top: mainDialog.mouse.y },
-        withLabel: withLabel
+        setter: this.selectedSetter,
+        values: valuesString,
+        withLabel: withLabel,
+        position: { left: mainDialog.mouse.x, top: mainDialog.mouse.y }
     };
     var timerButton = new YafuTimerButton(cell, true);
     allCells.push(timerButton);
@@ -595,6 +573,24 @@ class AddNewTimerButtonDialog {
     this.selectedDeviceName = this.jsonDevices[0].displayName;
     $( "#timerButtonDialogSelectDevice" ).selectmenu( "refresh" );
 
+    var selectSetterDOM = document.getElementById("timerButtonDialogSelectSetter");
+    selectSetterDOM.innerHTML = '';
+    var setters = this.jsonDevices[0].setters;
+
+    var isFirst = 1;
+    for (var i in setters) {
+      for (var setterName in setters[i]) {
+        var optionDiv = document.createElement("option");
+        optionDiv.innerHTML = setterName;
+        optionDiv.setAttribute("setter", setterName);
+        selectSetterDOM.appendChild(optionDiv);
+        if (isFirst == 1) {
+          isFirst = 0;
+          this.selectedSetter = setterName;
+        }
+      }
+    }
+    $( "#timerButtonDialogSelectSetter" ).selectmenu( "refresh" );
   }
 
   open() {

@@ -190,7 +190,6 @@ public class FhemController {
         jsonDevice.put("deviceName", device.getName());
         jsonDevice.put("displayName", device.getDisplayName());
 
-        if (!"getDevicesWithTimerButtons".equals(cmd)) {
           JSONArray jsonSetters = new JSONArray();
           for (String setterName : stringListMap.keySet()) {
             List<String> valueList = stringListMap.get(setterName);
@@ -200,7 +199,6 @@ public class FhemController {
             jsonSetters.put(jsonSetter);
           }
           jsonDevice.put("setters", jsonSetters);
-        }
 
         jsonDevices.put(jsonDevice);
       }
