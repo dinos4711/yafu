@@ -9,8 +9,8 @@ class YafuTimerButton {
         this.cell = cell;
 
         var myContent = '\
-            <div ui-uuid="' + this.cell.id + '" class="ui-button ui-widget ui-corner-all ui-button-icon-only" >\
-                <span class="ui-icon ui-icon-gear"></span>Button\
+            <div ui-uuid="' + this.cell.id + '" >\
+                <i class="far fa-clock fa-2x"></i>\
             </div>\
         ';
         if (cell.withLabel) {
