@@ -262,7 +262,7 @@ class AddNewTimerDialog {
                 </td>\
             </tr>\
             <tr>\
-                <td><label for="addNewTimerDialogSelectSetterValue">Time</label></td>\
+                <td><label for="addNewTimerDialogTime">Time</label></td>\
                 <td><input type="text" name="time" id="addNewTimerDialogTime" class="text ui-widget-content ui-corner-all"></td>\
             </tr>\
         </table>';
@@ -305,7 +305,7 @@ class AddNewTimerDialog {
                     }
                     var somethingUnique = uuidv4().replace(/-/g, "_");
                     var fhemCommand = 'define yafu_' + thisAddNewTimerDialog.cell.device + '_' + somethingUnique + ' at ' + time +
-                        ' set ' + thisAddNewTimerDialog.cell.device + ' ' + thisAddNewTimerDialog.selectedSetter + ' ' + value;
+                        ' set ' + thisAddNewTimerDialog.cell.device + ' ' + thisAddNewTimerDialog.cell.setter + ' ' + value;
 
                     sendCommandToFhem(fhemCommand);
 
@@ -320,14 +320,6 @@ class AddNewTimerDialog {
         });
 
         this.updateValues();
-
-        $( "#addNewTimerDialogSelectSetterValue" ).selectmenu({
-            width: 450,
-            change: function( event, data ) {
-                thisAddNewTimerDialog.selectedValue = data.item.element.attr("value");
-            }
-        });
-
 
     }
 
