@@ -28,7 +28,7 @@ class YafuReading {
       this.cell.position = {top: 50, left: 10};
     }
     if (typeof this.cell.size == 'undefined') {
-      this.cell.size = {width: 400, height: 20};
+      this.cell.size = {width: 50, height: 20};
     }
     $("div[draggable-id=" + this.cell.id + "]").css({top: this.cell.position.top, left: this.cell.position.left, width: this.cell.size.width, height: this.cell.size.height});
     $("div[draggable-id=" + this.cell.id + "]").css('z-index', 100);
