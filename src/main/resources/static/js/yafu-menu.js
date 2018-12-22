@@ -2,6 +2,8 @@
 // Yet Another FHEM UI - Menu
 //
 
+var menuEntryContextMenuDialog;
+
 class YafuMenu {
   constructor(menu, sendToServer = false) {
     var _this = this;
@@ -235,3 +237,27 @@ function sendMenuToServer(menu) {
      });
 
 }
+
+function createMenuEntryContextMenuDialog(data) {
+    var element = document.createElement("div");
+    element.innerHTML = data;
+    document.body.appendChild(element);
+
+    menuEntryContextMenuDialog = $( "#menuEntryContextMenuDialog" ).dialog({
+      autoOpen: false,
+      modal: true
+    });
+    $("#menuEntryContextMenuDialog").css('z-index', 9999);
+    $( "#menuEntryContextMenu" ).menu();
+}
+
+$(document).ready(function() {
+    $.ajax({
+        type: "GET",
+        url: "menuEntryContextMenuDialog.html",
+        cache: false,
+        success: function(data) {
+            createMenuEntryContextMenuDialog(data);
+        }
+    });
+});

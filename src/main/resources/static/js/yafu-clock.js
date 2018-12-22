@@ -65,6 +65,7 @@ class YafuClock {
     }).resizable({
         minWidth: 10,
         minHeight: 10,
+        ghost: true,
         grid: [ gridSize, gridSize ],
         helper: "ui-resizable-helper",
         resize: function( event, ui ) {

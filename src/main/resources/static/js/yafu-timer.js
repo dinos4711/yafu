@@ -2,6 +2,8 @@
 // Yet Another FHEM UI - TimerButton
 //
 
+var timerButtonContextMenuDialog;
+
 class YafuTimerButton {
     constructor(cell, sendToServer = false) {
         var thisYafuTimerButton = this;
@@ -608,3 +610,27 @@ class AddNewTimerButtonDialog {
   }
 
 }
+
+function createTimerButtonContextMenuDialog(data) {
+    var element = document.createElement("div");
+    element.innerHTML = data;
+    document.body.appendChild(element);
+
+    timerButtonContextMenuDialog = $( "#timerButtonContextMenuDialog" ).dialog({
+      autoOpen: false,
+      modal: true
+    });
+    $("#timerButtonContextMenuDialog").css('z-index', 9999);
+    $( "#timerButtonContextMenu" ).menu();
+}
+
+$(document).ready(function() {
+    $.ajax({
+        type: "GET",
+        url: "timerButtonContextMenuDialog.html",
+        cache: false,
+        success: function(data) {
+            createTimerButtonContextMenuDialog(data);
+        }
+    });
+});

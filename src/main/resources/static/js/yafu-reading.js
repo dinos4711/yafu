@@ -2,6 +2,8 @@
 // Yet Another FHEM UI - Reading
 //
 
+var readableContextMenuDialog;
+
 class YafuReading {
   constructor(cell, sendToServer = false) {
     var _this = this;
@@ -313,3 +315,27 @@ class AddNewReadingDialog {
     this.dialog.dialog( "close" );
   }
 }
+
+function createReadableContextMenuDialog(data) {
+    var element = document.createElement("div");
+    element.innerHTML = data;
+    document.body.appendChild(element);
+
+    readableContextMenuDialog = $( "#readableContextMenuDialog" ).dialog({
+      autoOpen: false,
+      modal: true
+    });
+    $("#readableContextMenuDialog").css('z-index', 9999);
+    $( "#readableContextMenu" ).menu();
+}
+
+$(document).ready(function() {
+    $.ajax({
+        type: "GET",
+        url: "readableContextMenuDialog.html",
+        cache: false,
+        success: function(data) {
+            createReadableContextMenuDialog(data);
+        }
+    });
+});

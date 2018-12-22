@@ -12,9 +12,6 @@ var addNewSwitchDialog;
 var mainDialog;
 var addPageDialog;
 var fhemConfigDialog;
-var readableContextMenuDialog;
-var timerButtonContextMenuDialog;
-var menuEntryContextMenuDialog;
 
 var globalMenu = {};
 
@@ -161,78 +158,12 @@ function initDialogs() {
         }
     });
 
-    $.ajax({
-        type: "GET",
-        url: "readableContextMenuDialog.html",
-        cache: false,
-        success: function(data) {
-            createReadableContextMenuDialog(data);
-        }
-    });
-
-    $.ajax({
-        type: "GET",
-        url: "timerButtonContextMenuDialog.html",
-        cache: false,
-        success: function(data) {
-            createTimerButtonContextMenuDialog(data);
-        }
-    });
-
-    $.ajax({
-        type: "GET",
-        url: "menuEntryContextMenuDialog.html",
-        cache: false,
-        success: function(data) {
-            createMenuEntryContextMenuDialog(data);
-        }
-    });
-
     $( ".icon-close" ).button( {
         icon: "ui-icon-close",
         showLabel: false
     } );
 
 };
-
-function createMenuEntryContextMenuDialog(data) {
-    var element = document.createElement("div");
-    element.innerHTML = data;
-    document.body.appendChild(element);
-
-    menuEntryContextMenuDialog = $( "#menuEntryContextMenuDialog" ).dialog({
-      autoOpen: false,
-      modal: true
-    });
-    $("#menuEntryContextMenuDialog").css('z-index', 9999);
-    $( "#menuEntryContextMenu" ).menu();
-}
-
-function createReadableContextMenuDialog(data) {
-    var element = document.createElement("div");
-    element.innerHTML = data;
-    document.body.appendChild(element);
-
-    readableContextMenuDialog = $( "#readableContextMenuDialog" ).dialog({
-      autoOpen: false,
-      modal: true
-    });
-    $("#readableContextMenuDialog").css('z-index', 9999);
-    $( "#readableContextMenu" ).menu();
-}
-
-function createTimerButtonContextMenuDialog(data) {
-    var element = document.createElement("div");
-    element.innerHTML = data;
-    document.body.appendChild(element);
-
-    timerButtonContextMenuDialog = $( "#timerButtonContextMenuDialog" ).dialog({
-      autoOpen: false,
-      modal: true
-    });
-    $("#timerButtonContextMenuDialog").css('z-index', 9999);
-    $( "#timerButtonContextMenu" ).menu();
-}
 
 function createMainDialog(data) {
     var element = document.createElement("div");
