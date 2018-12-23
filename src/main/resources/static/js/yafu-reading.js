@@ -2,8 +2,6 @@
 // Yet Another FHEM UI - Reading
 //
 
-var readableContextMenuDialog;
-
 class YafuReading {
   constructor(cell, sendToServer = false) {
     var _this = this;
@@ -35,14 +33,21 @@ class YafuReading {
     $("div[draggable-id=" + this.cell.id + "]").css({top: this.cell.position.top, left: this.cell.position.left, width: this.cell.size.width, height: this.cell.size.height});
     $("div[draggable-id=" + this.cell.id + "]").css('z-index', 100);
 
-    $("div[draggable-id=" + this.cell.id + "]").contextmenu(function() {
-        if (config.mode == 'edit') {
-            $('#menu_readableDelete').click(function() {
-                readableContextMenuDialog.dialog( "close");
+    $("div[draggable-id=" + this.cell.id + "]").contextMenu({
+        selector: 'div',
+        events: {
+           show : function(options){
+                return config.mode == 'edit';
+           },
+        },
+        callback: function(key, options) {
+            if (key == 'delete') {
                 sendRemoveCellToServer(_this.cell.id);
                 $("div[draggable-id=" + _this.cell.id + "]").remove();
-            });
-            readableContextMenuDialog.dialog( "open");
+            }
+        },
+        items: {
+            "delete": {name: "Delete", icon: "delete"},
         }
     });
 
@@ -315,27 +320,3 @@ class AddNewReadingDialog {
     this.dialog.dialog( "close" );
   }
 }
-
-function createReadableContextMenuDialog(data) {
-    var element = document.createElement("div");
-    element.innerHTML = data;
-    document.body.appendChild(element);
-
-    readableContextMenuDialog = $( "#readableContextMenuDialog" ).dialog({
-      autoOpen: false,
-      modal: true
-    });
-    $("#readableContextMenuDialog").css('z-index', 9999);
-    $( "#readableContextMenu" ).menu();
-}
-
-$(document).ready(function() {
-    $.ajax({
-        type: "GET",
-        url: "readableContextMenuDialog.html",
-        cache: false,
-        success: function(data) {
-            createReadableContextMenuDialog(data);
-        }
-    });
-});

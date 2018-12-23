@@ -2,8 +2,6 @@
 // Yet Another FHEM UI - Switch
 //
 
-var switchContextMenuDialog;
-
 class YafuSwitch {
   constructor(cell, sendToServer = false) {
     var _this = this;
@@ -35,14 +33,21 @@ class YafuSwitch {
     }
     $("div[draggable-id=" + this.cell.id + "]").css({top: this.cell.position.top, left: this.cell.position.left, width: this.cell.size.width, height: this.cell.size.height});
 
-    $("div[draggable-id=" + this.cell.id + "]").contextmenu(function() {
-        if (config.mode == 'edit') {
-            $('#menu_switchDelete').click(function() {
-                switchContextMenuDialog.dialog( "close");
+    $("div[draggable-id=" + this.cell.id + "]").contextMenu({
+        selector: 'div',
+        events: {
+           show : function(options){
+                return config.mode == 'edit';
+           },
+        },
+        callback: function(key, options) {
+            if (key == 'delete') {
                 sendRemoveCellToServer(_this.cell.id);
                 $("div[draggable-id=" + _this.cell.id + "]").remove();
-            });
-            switchContextMenuDialog.dialog( "open");
+            }
+        },
+        items: {
+            "delete": {name: "Delete", icon: "delete"},
         }
     });
 
@@ -265,27 +270,3 @@ class AddNewSwitchDialog {
   }
 
 }
-
-function createSwitchContextMenuDialog(data) {
-    var element = document.createElement("div");
-    element.innerHTML = data;
-    document.body.appendChild(element);
-
-    switchContextMenuDialog = $( "#switchContextMenuDialog" ).dialog({
-      autoOpen: false,
-      modal: true
-    });
-    $("#switchContextMenuDialog").css('z-index', 9999);
-    $( "#switchContextMenu" ).menu();
-}
-
-$(document).ready(function() {
-    $.ajax({
-        type: "GET",
-        url: "switchContextMenuDialog.html",
-        cache: false,
-        success: function(data) {
-            createSwitchContextMenuDialog(data);
-        }
-    });
-});

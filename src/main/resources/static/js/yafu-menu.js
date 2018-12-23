@@ -2,8 +2,6 @@
 // Yet Another FHEM UI - Menu
 //
 
-var menuEntryContextMenuDialog;
-
 class YafuMenu {
   constructor(menu, sendToServer = false) {
     var _this = this;
@@ -79,43 +77,63 @@ class YafuMenu {
         });
       }
 
-      $('#menu-' + i).contextmenu(function() {
-        var index = $(this).attr("id").split("-")[1];
-        console.log(index);
-        console.log(_this.menu.entries[index].name);
-        if (config.mode == 'edit') {
-          var hidden;
-          if (_this.menu.entries[index].hidden) {
-            $('#menu_menuEntryHideShow').text("Show");
-            hidden = true;
-          } else {
-            $('#menu_menuEntryHideShow').text("Hide");
-            hidden = false;
+//      $('#menu-' + i).contextmenu(function() {
+//        var index = $(this).attr("id").split("-")[1];
+//        console.log(index);
+//        console.log(_this.menu.entries[index].name);
+//        if (config.mode == 'edit') {
+//          var hidden;
+//          if (_this.menu.entries[index].hidden) {
+//            $('#menu_menuEntryHideShow').text("Show");
+//            hidden = true;
+//          } else {
+//            $('#menu_menuEntryHideShow').text("Hide");
+//            hidden = false;
+//          }
+//
+//          $('#menu_menuEntryHideShow').click(function() {
+//            menuEntryContextMenuDialog.dialog( "close");
+//            hidden = !hidden;
+//            _this.menu.entries[index].hidden = hidden;
+//
+//            if (hidden) {
+//              $('#menu-' + index).addClass('hideable');
+//            } else {
+//              $('#menu-' + index).removeClass('hideable');
+//            }
+//
+//            sendMenuToServer(_this.menu);
+//            $('#menu_menuEntryHideShow').unbind("click");
+//          });
+//          menuEntryContextMenuDialog.dialog( "open");
+//        }
+//      });
+//
+//      if (this.menu.entries[i].hidden && config.mode == 'view') {
+//        $('#menu-' + i).hide();
+//      } else {
+//        $('#menu-' + i).show();
+//      }
+
+      $('#menu-' + i).contextMenu({
+          selector: 'div',
+          events: {
+             show : function(options){
+                  return config.mode == 'edit';
+             },
+          },
+          callback: function(key, options) {
+              if (key == 'hide-show') {
+                  console.log(i);
+                  console.log(this);
+                  console.log(options);
+              }
+          },
+          items: {
+              "hide-show": {name: "Delete", icon: "delete"},
+              "delete": {name: "Delete", icon: "delete"},
           }
-
-          $('#menu_menuEntryHideShow').click(function() {
-            menuEntryContextMenuDialog.dialog( "close");
-            hidden = !hidden;
-            _this.menu.entries[index].hidden = hidden;
-
-            if (hidden) {
-              $('#menu-' + index).addClass('hideable');
-            } else {
-              $('#menu-' + index).removeClass('hideable');
-            }
-
-            sendMenuToServer(_this.menu);
-            $('#menu_menuEntryHideShow').unbind("click");
-          });
-          menuEntryContextMenuDialog.dialog( "open");
-        }
       });
-
-      if (this.menu.entries[i].hidden && config.mode == 'view') {
-        $('#menu-' + i).hide();
-      } else {
-        $('#menu-' + i).show();
-      }
 
     }
 
@@ -213,8 +231,6 @@ function sendRemoveMenuToServer() {
 }
 
 function sendMenuToServer(menu) {
-     console.log(menu);
-
      $.ajax({
          type: "GET",
          url: "sendMenuToServer",

@@ -159,6 +159,24 @@ class YafuSlider {
       sendRemoveCellToServer(_this.cell.id);
       $("div[draggable-id=" + _this.cell.id + "]").remove();
     });
+
+    $("div[draggable-id=" + this.cell.id + "]").contextMenu({
+        selector: 'div',
+        events: {
+           show : function(options){
+                return config.mode == 'edit';
+           },
+        },
+        callback: function(key, options) {
+            if (key == 'delete') {
+                sendRemoveCellToServer(_this.cell.id);
+                $("div[draggable-id=" + _this.cell.id + "]").remove();
+            }
+        },
+        items: {
+            "delete": {name: "Delete", icon: "delete"},
+        }
+    });
   }
 
   setEnabled(enabled) {

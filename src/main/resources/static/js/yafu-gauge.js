@@ -39,7 +39,6 @@ class YafuGauge {
     var myContent = '\
         <canvas ui-uuid="' + this.cell.id + '" id="' + this.cell.id + '" width="220" height="220" styl="background-color:#000000"></canvas>\
         <div label-id="' + this.cell.id + '" class="editable" style="position: absolute; top: 0px; left: 100px">' + this.cell.name + '</div>\
-        <button id="button-close-' + this.cell.id + '" class="hideable" style="position: absolute; top: 0px; right: 0px; width: 18px; height: 18px;">x</button>\
     ';
 
     var cellElement = document.createElement("div");
@@ -149,13 +148,23 @@ class YafuGauge {
 
     }, this);
 
-    $("button[id=button-close-" + this.cell.id + "]").button({
-      icon: "ui-icon-close",
-      showLabel: false
-    }).on("click", function() {
-      sendRemoveCellToServer(_this.cell.id);
-      $("div[draggable-id=" + _this.cell.id + "]").remove();
-      stopGauge(_this);
+    $("div[draggable-id=" + this.cell.id + "]").contextMenu({
+        selector: 'canvas',
+        events: {
+           show : function(options){
+                return config.mode == 'edit';
+           },
+        },
+        callback: function(key, options) {
+            if (key == 'delete') {
+                sendRemoveCellToServer(_this.cell.id);
+                $("div[draggable-id=" + _this.cell.id + "]").remove();
+                stopGauge(_this);
+            }
+        },
+        items: {
+            "delete": {name: "Delete", icon: "delete"},
+        }
     });
 
     this.readingAngle = null;

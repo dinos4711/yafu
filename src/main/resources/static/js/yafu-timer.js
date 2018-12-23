@@ -2,8 +2,6 @@
 // Yet Another FHEM UI - TimerButton
 //
 
-var timerButtonContextMenuDialog;
-
 class YafuTimerButton {
     constructor(cell, sendToServer = false) {
         var thisYafuTimerButton = this;
@@ -40,14 +38,21 @@ class YafuTimerButton {
         }
         $("div[draggable-id=" + this.cell.id + "]").css({top: this.cell.position.top, left: this.cell.position.left, width: this.cell.size.width, height: this.cell.size.height});
 
-        $("div[draggable-id=" + this.cell.id + "]").contextmenu(function() {
-            if (config.mode == 'edit') {
-                $('#menu_timerButtonDelete').click(function() {
-                    timerButtonContextMenuDialog.dialog( "close");
+        $("div[draggable-id=" + this.cell.id + "]").contextMenu({
+            selector: 'div',
+            events: {
+               show : function(options){
+                    return config.mode == 'edit';
+               },
+            },
+            callback: function(key, options) {
+                if (key == 'delete') {
                     sendRemoveCellToServer(thisYafuTimerButton.cell.id);
                     $("div[draggable-id=" + thisYafuTimerButton.cell.id + "]").remove();
-                });
-                timerButtonContextMenuDialog.dialog( "open");
+                }
+            },
+            items: {
+                "delete": {name: "Delete", icon: "delete"},
             }
         });
 
@@ -610,27 +615,3 @@ class AddNewTimerButtonDialog {
   }
 
 }
-
-function createTimerButtonContextMenuDialog(data) {
-    var element = document.createElement("div");
-    element.innerHTML = data;
-    document.body.appendChild(element);
-
-    timerButtonContextMenuDialog = $( "#timerButtonContextMenuDialog" ).dialog({
-      autoOpen: false,
-      modal: true
-    });
-    $("#timerButtonContextMenuDialog").css('z-index', 9999);
-    $( "#timerButtonContextMenu" ).menu();
-}
-
-$(document).ready(function() {
-    $.ajax({
-        type: "GET",
-        url: "timerButtonContextMenuDialog.html",
-        cache: false,
-        success: function(data) {
-            createTimerButtonContextMenuDialog(data);
-        }
-    });
-});

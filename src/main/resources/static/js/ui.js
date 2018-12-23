@@ -221,11 +221,6 @@ function createMainDialog(data) {
         addNewSliderDialog.open();
     });
 
-    $('#menu_add_new_gauge').click(function(){
-        mainDialog.dialog( "close");
-        addNewGaugeDialog.open();
-    });
-
     $('#menu_add_new_timer_button').click(function(){
         mainDialog.dialog( "close");
         addNewTimerButtonDialog.open();
@@ -677,14 +672,170 @@ $(document).ready(function() {
   addNewTimerButtonDialog = new AddNewTimerButtonDialog();
   addNewSwitchDialog      = new AddNewSwitchDialog();
 
-  document.addEventListener('contextmenu', function(evt) {
-    console.log(evt);
-    if (evt.target.localName == 'body') {
-      mainDialog.mouse = {"x": evt.clientX, "y": evt.clientY};
-      $("#mainDialog").css('z-index', 9999);
-      mainDialog.dialog( "open" );
-    }
-  }, false);
+//  document.addEventListener('contextmenu', function(evt) {
+//    console.log(evt);
+//    if (evt.target.localName == 'body') {
+//      mainDialog.mouse = {"x": evt.clientX, "y": evt.clientY};
+//      $("#mainDialog").css('z-index', 9999);
+//      mainDialog.dialog( "open" );
+//    }
+//  }, false);
+//
+
+  $(document).contextMenu({
+        selector: 'body',
+        callback: function(key, options) {
+            console.log(key);
+//            if (key == 'menu_mode_edit') {
+//                config.mode = 'view';
+//                updateEditMode();
+//                saveConfiguration();
+//            }
+//            if (key == 'menu_mode_view') {
+//                config.mode = 'edit';
+//                updateEditMode();
+//                saveConfiguration();
+//            }
+
+        },
+        items: {
+            "menu_mode_edit": {
+                name: "Edit",
+                icon: "far fa-edit",
+                disabled: function(key, opt) {
+                    return config.mode == 'edit';
+                },
+                callback: function() {
+                    config.mode = 'edit';
+                    updateEditMode();
+                    saveConfiguration();
+                    return true;
+                }
+            },
+            "menu_mode_view": {
+                name: "View",
+                icon: "fas fa-eye",
+                disabled: function(key, opt) {
+                    return config.mode == 'view';
+                },
+                callback: function() {
+                    config.mode = 'view';
+                    updateEditMode();
+                    saveConfiguration();
+                    return true;
+                }
+            },
+            "menu_settings": {
+                name: "Settings",
+                icon: "fas fa-cogs",
+                disabled: function(key, opt) {
+                    return config.mode == 'view';
+                },
+                callback: function() {
+                    fhemConfigDialog.dialog( "open" );
+                    return true;
+                }
+            },
+            "menu_add_submenu": {
+                name: "Add",
+                icon: "fas fa-plus",
+                disabled: function(key, opt) {
+                    return config.mode == 'view';
+                },
+                items: {
+                    "menu_add_page": {
+                        name: "Page",
+                        icon: "far fa-file",
+                        disabled: function(key, opt) {
+                            return config.mode == 'view';
+                        },
+                        callback: function() {
+                            addNewPage();
+                            return true;
+                        }
+                    },
+                    "menu_add_menu": {
+                        name: "Menu",
+                        icon: "fas fa-bars",
+                        disabled: function(key, opt) {
+                            return config.mode == 'view';
+                        },
+                        callback: function() {
+                            addMenu();
+                            return true;
+                        }
+                    },
+                    "menu_add_clock": {
+                        name: "Clock",
+                        icon: "fas fa-clock",
+                        disabled: function(key, opt) {
+                            return config.mode == 'view';
+                        },
+                        callback: function() {
+                            addNewClock();
+                            return true;
+                        }
+                    },
+                    "menu_add_new_gauge": {
+                        name: "Gauge",
+                        icon: "fab fa-audible",
+                        disabled: function(key, opt) {
+                            return config.mode == 'view';
+                        },
+                        callback: function() {
+                            addNewGaugeDialog.open();
+                            return true;
+                        }
+                    },
+                    "menu_add_new_slider": {
+                        name: "Slider",
+                        icon: "fas fa-sliders-h",
+                        disabled: function(key, opt) {
+                            return config.mode == 'view';
+                        },
+                        callback: function() {
+                            addNewSliderDialog.open();
+                            return true;
+                        }
+                    },
+                    "menu_add_new_reading": {
+                        name: "Reading",
+                        icon: "fas fa-book-reader",
+                        disabled: function(key, opt) {
+                            return config.mode == 'view';
+                        },
+                        callback: function() {
+                            addNewReadingDialog.open();
+                            return true;
+                        }
+                    },
+                    "menu_add_new_switch": {
+                        name: "Switch",
+                        icon: "fas fa-power-off",
+                        disabled: function(key, opt) {
+                            return config.mode == 'view';
+                        },
+                        callback: function() {
+                            addNewSwitchDialog.open();
+                            return true;
+                        }
+                    },
+                    "menu_add_new_timer_button": {
+                        name: "Timer button",
+                        icon: "fas fa-business-time",
+                        disabled: function(key, opt) {
+                            return config.mode == 'view';
+                        },
+                        callback: function() {
+                            addNewTimerButtonDialog.open();
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+  });
+
 
 
   document.oncontextmenu=RightMouseDown;
