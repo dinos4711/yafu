@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Time selector test</title>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+
+    <script src="js/yafu-tools.js"></script>
+    <script src="js/yafu-time-selector.js"></script>
+
+</head>
+<body>
+
+<div id="timeSelector">
+Bla
+</div>
+
+<script>
+    $(document).ready(function() {
+        var selector = $( "#timeSelector" ).timeSelector({
+            minValue: 0,
+            maxValue: 59,
+            width: 150,
+            height: 150,
+            valueChanged: function( event, data ) {
+                console.log(data.value);
+            }
+        });
+        console.log(selector.timeSelector("getValue"));
+    });
+</script>
+
+</body>
+</html>

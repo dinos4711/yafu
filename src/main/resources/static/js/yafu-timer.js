@@ -261,7 +261,7 @@ class AddNewTimerDialog {
         <p>Select a value and enter a relative time</p>\
         <table>\
             <tr>\
-                <td><label for="addNewTimerDialogSelectSetterValue">Value</label></td>\
+                <td><label for="addNewTimerDialogSelectSetterValue">Value to set</label></td>\
                 <td>\
                     <select id="addNewTimerDialogSelectSetterValue">\
                         <option>Please wait ...</option>\
@@ -269,8 +269,8 @@ class AddNewTimerDialog {
                 </td>\
             </tr>\
             <tr>\
-                <td><label for="addNewTimerDialogTime">Time</label></td>\
-                <td><input type="text" name="time" id="addNewTimerDialogTime" class="text ui-widget-content ui-corner-all"></td>\
+                <td><label for="addNewTimerDialogMinutesSelector">Time from now</label></td>\
+                <td><div id="addNewTimerDialogHoursSelector"></div><div id="addNewTimerDialogMinutesSelector"></div></td>\
             </tr>\
         </table>';
 
@@ -279,6 +279,21 @@ class AddNewTimerDialog {
         cellElement.title="New Timer for " + cell.name + " and " + cell.setter;
         cellElement.innerHTML = myContent;
         document.getElementById("uicontainer").appendChild(cellElement);
+
+        var hoursSelector = $( "#addNewTimerDialogHoursSelector" ).timeSelector({
+            minValue: 0,
+            maxValue: 23,
+            width: 100,
+            height: 100,
+            text: "Hours"
+        });
+        var minutesSelector = $( "#addNewTimerDialogMinutesSelector" ).timeSelector({
+            minValue: 0,
+            maxValue: 59,
+            width: 100,
+            height: 100,
+            text: "Minutes"
+        });
 
         var dialog = $( "#newTimerDialog" ).dialog({
             modal: true,
@@ -290,7 +305,12 @@ class AddNewTimerDialog {
 
                 },
                 Ok: function() {
-                    var time = $( "#addNewTimerDialogTime" ).val().replace(/\+/g, "%2B");
+                    var hours = hoursSelector.timeSelector("getValue");
+                    var minutes = minutesSelector.timeSelector("getValue");
+
+                    var time = "%2B" + ("00" + hours).substr(-2, 2) + ":" + ("00" + minutes).substr(-2, 2) + ":00";
+                    console.log(time);
+
                     var value;
                     switch (thisAddNewTimerDialog.valueMode) {
                         case MODE_NO_VALUE:

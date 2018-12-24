@@ -37,7 +37,7 @@ class YafuGauge {
     }
 
     var myContent = '\
-        <canvas ui-uuid="' + this.cell.id + '" id="' + this.cell.id + '" width="220" height="220" styl="background-color:#000000"></canvas>\
+        <canvas ui-uuid="' + this.cell.id + '" id="' + this.cell.id + '" width="220" height="220"></canvas>\
         <div label-id="' + this.cell.id + '" class="editable" style="position: absolute; top: 0px; left: 100px">' + this.cell.name + '</div>\
     ';
 

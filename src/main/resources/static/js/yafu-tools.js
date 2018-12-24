@@ -2,6 +2,26 @@
 // Yet Another FHEM UI - Tools
 //
 
+// Converts from degrees to radians.
+Math.radians = function(degrees) {
+  return degrees * Math.PI / 180;
+};
+
+// Converts from radians to degrees.
+Math.degrees = function(radians) {
+  return radians * 180 / Math.PI;
+};
+
+const mapNumber = (number, in_min, in_max, out_min, out_max) => {
+  return (number - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+};
+
+Number.prototype.pad = function(size) {
+    var s = String(this);
+    while (s.length < (size || 2)) {s = "0" + s;}
+    return s;
+}
+
 (function ( $ ) {
 
     $.widget( "yafu.deviceSelector", {

@@ -891,23 +891,11 @@ $(document).ajaxStart(function(){
 //    cache: false
 //});
 
-// Converts from degrees to radians.
-Math.radians = function(degrees) {
-  return degrees * Math.PI / 180;
-};
 
-// Converts from radians to degrees.
-Math.degrees = function(radians) {
-  return radians * 180 / Math.PI;
-};
 
 Number.prototype.map = function (in_min, in_max, out_min, out_max) {
   return (this - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
-
-const mapNumber = (number, in_min, in_max, out_min, out_max) => {
-  return (number - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-};
 
 function toPossibleInteger(value) {
   var result = parseFloat(value);
