@@ -22,6 +22,19 @@ Number.prototype.pad = function(size) {
     return s;
 }
 
+function toPossibleInteger(value) {
+  var result = parseFloat(value);
+  if (!isNaN(result)) {
+    if (Number.isInteger(result)) {
+      result = Math.floor(result);
+    }
+  } else {
+    result = value;
+  }
+
+  return result;
+}
+
 (function ( $ ) {
 
     $.widget( "yafu.deviceSelector", {

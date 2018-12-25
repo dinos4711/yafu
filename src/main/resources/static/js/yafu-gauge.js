@@ -585,23 +585,27 @@ class AddNewGaugeDialog {
       height: 350,
       modal: true,
       autoOpen: false,
-      buttons: {
-        Ok: function() {
-          var foundDevice = _this.jsonDevices.find(function(element) {
-            return element.deviceName == _this.selectedDevice;
-          });
-          var foundSetter = foundDevice.setters.find(function(element) {
-            return typeof element[_this.selectedSetter] != 'undefined';
-          });
-          var values = foundSetter[_this.selectedSetter];
+      buttons: [
+        {
+            text: "Ok",
+            icon: "ui-icon-check",
+            click: function() {
+              var foundDevice = _this.jsonDevices.find(function(element) {
+                return element.deviceName == _this.selectedDevice;
+              });
+              var foundSetter = foundDevice.setters.find(function(element) {
+                return typeof element[_this.selectedSetter] != 'undefined';
+              });
+              var values = foundSetter[_this.selectedSetter];
 
-          var onlyIntegers = document.getElementById("gaugeDialogOnlyIntegers").checked;
+              var onlyIntegers = document.getElementById("gaugeDialogOnlyIntegers").checked;
 
-          $( this ).dialog( "close" );
+              $( this ).dialog( "close" );
 
-          _this.addNewGauge(values, onlyIntegers);
+              _this.addNewGauge(values, onlyIntegers);
+            }
         }
-      }
+      ]
     });
 
     $( "#gaugeDialogSelectDevice" ).selectmenu({

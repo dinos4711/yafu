@@ -193,17 +193,21 @@ class AddNewSwitchDialog {
       height: 350,
       modal: true,
       autoOpen: false,
-      buttons: {
-        Ok: function() {
-          var foundDevice = _this.jsonDevices.find(function(element) {
-            return element.deviceName == _this.selectedDevice;
-          });
+      buttons: [
+          {
+            text: "Ok",
+            icon: "ui-icon-check",
+            click: function() {
+              var foundDevice = _this.jsonDevices.find(function(element) {
+                return element.deviceName == _this.selectedDevice;
+              });
 
-          $( this ).dialog( "close" );
+              $( this ).dialog( "close" );
 
-          _this.addNewSwitch();
-        }
-      }
+              _this.addNewSwitch();
+            }
+          }
+      ]
     });
 
     $( "#switchDialogSelectDevice" ).selectmenu({

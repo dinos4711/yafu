@@ -72,7 +72,7 @@ public class FhemController {
 
   @RequestMapping(value = "/getUIContent", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
   public @ResponseBody
-  String getUIContent(@RequestParam(name = "page", required = false, defaultValue = "home") String pageName) {
+  String getUIContent(@RequestParam(name = "page", required = false, defaultValue = "Home") String pageName) {
     UIModel uiModel = UIModel.readFromFile(new File("ui.json"));
     Page page = uiModel.getPage(pageName);
     if (page != null) {
@@ -105,15 +105,6 @@ public class FhemController {
     } else {
       return new JSONObject().toString();
     }
-  }
-
-  public static void main(String[] args) {
-    FhemController fhemController = new FhemController();
-    String result = fhemController.getContentFromServer("getDevicesWithTimerButtons");
-    System.out.println(result);
-
-    String setters = fhemController.getDeviceSetters("HT_Kueche");
-    System.out.println(setters);
   }
 
   @RequestMapping(value = "/getTimers", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
@@ -226,7 +217,7 @@ public class FhemController {
 
   @RequestMapping(value = "/sendNewPageToServer", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
   public @ResponseBody
-  String sendNewPageToServer(@RequestParam(name = "page", required = false, defaultValue = "home") String pageName) {
+  String sendNewPageToServer(@RequestParam(name = "page", required = false, defaultValue = "Home") String pageName) {
 
     File modelFile = new File("ui.json");
     UIModel uiModel = UIModel.readFromFile(modelFile);
@@ -246,6 +237,35 @@ public class FhemController {
       uiModel.remove("menu");
       uiModel.writeToFile(modelFile);
     }
+
+    return "Ok.";
+  }
+
+  public static void main(String[] args) {
+    FhemController fhemController = new FhemController();
+    String result = fhemController.sendRemoveMenuEntryToServer("Home");
+    System.out.println(result);
+  }
+
+  @RequestMapping(value = "/sendRemoveMenuEntryToServer", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+  public @ResponseBody
+  String sendRemoveMenuEntryToServer(@RequestParam(name = "menuName", required = true) String menuName) {
+    File modelFile = new File("ui.json");
+
+    UIModel uiModel = UIModel.readFromFile(modelFile);
+    uiModel.removePage(menuName);
+    JSONObject menu = (JSONObject) uiModel.get("menu");
+    JSONArray entries = (JSONArray) menu.get("entries");
+
+    for (int i = 0; i < entries.length(); i++) {
+      JSONObject menuEntry = entries.getJSONObject(i);
+      if (menuEntry.getString("name").equals(menuName)) {
+        entries.remove(i);
+        break;
+      }
+    }
+
+    uiModel.writeToFile(modelFile);
 
     return "Ok.";
   }
@@ -276,7 +296,7 @@ public class FhemController {
   @RequestMapping(value = "/sendCellToServer", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
   public @ResponseBody
   String sendCellToServer(@RequestParam(name = "cell", required = true) String cell,
-                          @RequestParam(name = "page", required = false, defaultValue = "home") String pageName) {
+                          @RequestParam(name = "page", required = false, defaultValue = "Home") String pageName) {
 
     File modelFile = new File("ui.json");
     UIModel uiModel = UIModel.readFromFile(modelFile);
@@ -298,7 +318,7 @@ public class FhemController {
   @RequestMapping(value = "/sendRemoveCellToServer", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
   public @ResponseBody
   String sendRemoveCellToServer(@RequestParam(name = "cell", required = true) String cell,
-                                @RequestParam(name = "page", required = false, defaultValue = "home") String pageName) {
+                                @RequestParam(name = "page", required = false, defaultValue = "Home") String pageName) {
 
     File modelFile = new File("ui.json");
     UIModel uiModel = UIModel.readFromFile(modelFile);

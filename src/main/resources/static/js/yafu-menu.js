@@ -77,63 +77,70 @@ class YafuMenu {
         });
       }
 
-//      $('#menu-' + i).contextmenu(function() {
-//        var index = $(this).attr("id").split("-")[1];
-//        console.log(index);
-//        console.log(_this.menu.entries[index].name);
-//        if (config.mode == 'edit') {
-//          var hidden;
-//          if (_this.menu.entries[index].hidden) {
-//            $('#menu_menuEntryHideShow').text("Show");
-//            hidden = true;
-//          } else {
-//            $('#menu_menuEntryHideShow').text("Hide");
-//            hidden = false;
-//          }
-//
-//          $('#menu_menuEntryHideShow').click(function() {
-//            menuEntryContextMenuDialog.dialog( "close");
-//            hidden = !hidden;
-//            _this.menu.entries[index].hidden = hidden;
-//
-//            if (hidden) {
-//              $('#menu-' + index).addClass('hideable');
-//            } else {
-//              $('#menu-' + index).removeClass('hideable');
-//            }
-//
-//            sendMenuToServer(_this.menu);
-//            $('#menu_menuEntryHideShow').unbind("click");
-//          });
-//          menuEntryContextMenuDialog.dialog( "open");
-//        }
-//      });
-//
-//      if (this.menu.entries[i].hidden && config.mode == 'view') {
-//        $('#menu-' + i).hide();
-//      } else {
-//        $('#menu-' + i).show();
-//      }
-
-      $('#menu-' + i).contextMenu({
-          selector: 'div',
-          events: {
-             show : function(options){
-                  return config.mode == 'edit';
-             },
-          },
-          callback: function(key, options) {
-              if (key == 'hide-show') {
-                  console.log(i);
-                  console.log(this);
-                  console.log(options);
-              }
-          },
-          items: {
-              "hide-show": {name: "Delete", icon: "delete"},
-              "delete": {name: "Delete", icon: "delete"},
+      $('#menu-' + i).contextmenu(function() {
+        var index = $(this).attr("id").split("-")[1];
+        if (config.mode == 'edit') {
+          var hidden;
+          if (_this.menu.entries[index].hidden) {
+            $('#menu_menuEntryHideShow').text("Show");
+            hidden = true;
+          } else {
+            $('#menu_menuEntryHideShow').text("Hide");
+            hidden = false;
           }
+
+          $('#menu_menuEntryHideShow').click(function() {
+            menuEntryContextMenuDialog.dialog( "close");
+            hidden = !hidden;
+            _this.menu.entries[index].hidden = hidden;
+
+            if (hidden) {
+              $('#menu-' + index).addClass('hideable');
+            } else {
+              $('#menu-' + index).removeClass('hideable');
+            }
+
+            sendMenuToServer(_this.menu);
+            $('#menu_menuEntryHideShow').unbind("click");
+          });
+
+          $('#menu_menuEntryDelete').click(function() {
+            menuEntryContextMenuDialog.dialog( "close");
+            var answer = confirm("Are you sure?");
+            if (answer) {
+                sendRemoveMenuEntryToServer(menu.entries[i].name);
+            }
+          });
+
+          menuEntryContextMenuDialog.dialog( "open");
+        }
       });
+
+      if (this.menu.entries[i].hidden && config.mode == 'view') {
+        $('#menu-' + i).hide();
+      } else {
+        $('#menu-' + i).show();
+      }
+
+//      $('#menu-' + i).contextMenu({
+//          selector: 'div',
+//          events: {
+//             show : function(options){
+//                  return config.mode == 'edit';
+//             },
+//          },
+//          callback: function(key, options) {
+//              if (key == 'hide-show') {
+//                  console.log(i);
+//                  console.log(this);
+//                  console.log(options);
+//              }
+//          },
+//          items: {
+//              "hide-show": {name: "Delete", icon: "delete"},
+//              "delete": {name: "Delete", icon: "delete"},
+//          }
+//      });
 
     }
 
@@ -228,6 +235,31 @@ function sendRemoveMenuToServer() {
 
      });
 
+}
+
+function sendRemoveMenuEntryToServer(menuName) {
+    console.log("Will delete menu entry " + menuName);
+
+    $.ajax({
+             type: "GET",
+             url: "sendRemoveMenuEntryToServer",
+             data: {
+                menuName: menuName,
+                XHR: "1"
+            },
+            contentType: "application/json; charset=utf-8",
+            error: function(data) {
+                $.toast({
+                         heading: 'Error',
+                         text: "Could not delete page " + menuName,
+                         loader: false,
+                         hideAfter: 1000,
+                         showHideTransition: 'slide',
+                         icon: 'error'
+                     });
+            }
+
+         });
 }
 
 function sendMenuToServer(menu) {

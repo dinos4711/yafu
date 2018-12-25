@@ -248,17 +248,24 @@ function createAddPageDialog(data) {
       height: 380,
       width: 500,
       modal: true,
-      buttons: {
-        Ok: function() {
-          console.log("Create page " + $( "#pageName" ).val());
-          addPageDialog.dialog( "close" );
-          sendNewPageToServer($( "#pageName" ).val());
-        },
-        Cancel: function() {
-          addPageDialog.dialog( "close" );
-        }
-      }
-
+      buttons: [
+          {
+            text: "Ok",
+            icon: "ui-icon-check",
+            click: function() {
+              console.log("Create page " + $( "#pageName" ).val());
+              addPageDialog.dialog( "close" );
+              sendNewPageToServer($( "#pageName" ).val());
+            },
+          },
+          {
+            text: "Cancel",
+            icon: "ui-icon-cancel",
+            click: function() {
+              addPageDialog.dialog( "close" );
+            }
+          }
+      ]
     });
 
 }
@@ -297,45 +304,56 @@ function createFhemConfigDialog(data) {
       close: function(event, ui) {
 
         },
-      buttons: {
-        Test: function() {
-          $( "#status" ).text('Testing...');
-          let fhemHost = $( "#fhemHost" ).val();
-          let fhemUser = $( "#fhemUser" ).val();
-          let fhemPassword = $( "#fhemPassword" ).val();
-          let headers = new Headers();
+      buttons: [
+        {
+            text: "Test",
+            click: function() {
+              $( "#status" ).text('Testing...');
+              let fhemHost = $( "#fhemHost" ).val();
+              let fhemUser = $( "#fhemUser" ).val();
+              let fhemPassword = $( "#fhemPassword" ).val();
+              let headers = new Headers();
 
-          headers.set('Authorization', 'Basic ' + window.btoa(fhemUser + ":" + fhemPassword));
-          var url = fhemHost;
-          fetch(url, {method:'GET',
-                 headers: headers,
-                }).then(function(response) {
-                  console.log(response);
-                  if (! response.ok) {
-                    $( "#status" ).text(response.statusText);
-                  } else {
-                    var token = response.headers.get('X-FHEM-csrfToken');
-                    console.log("Token:" + token);
-                    $( "#status" ).text('Ok');
-                  }
+              headers.set('Authorization', 'Basic ' + window.btoa(fhemUser + ":" + fhemPassword));
+              var url = fhemHost;
+              fetch(url, {method:'GET',
+                     headers: headers,
+                    }).then(function(response) {
+                      console.log(response);
+                      if (! response.ok) {
+                        $( "#status" ).text(response.statusText);
+                      } else {
+                        var token = response.headers.get('X-FHEM-csrfToken');
+                        console.log("Token:" + token);
+                        $( "#status" ).text('Ok');
+                      }
 
-                }).catch(function(error) {
-                  $( "#status" ).text(error);
-                });
+                    }).catch(function(error) {
+                      $( "#status" ).text(error);
+                    });
+              }
         },
-        Ok: function() {
-          config.fhemHost = $( "#fhemHost" ).val();
-          config.fhemUser = $( "#fhemUser" ).val();
-          config.fhemPassword = $( "#fhemPassword" ).val();
-          config.proxyHost = $( "#proxyHost" ).val();
-          config.proxyPort = $( "#proxyPort" ).val();
-          saveConfiguration();
-          fhemConfigDialog.dialog( "close" );
+        {
+            text: "Cancel",
+            icon: "ui-icon-cancel",
+            click: function() {
+              fhemConfigDialog.dialog( "close" );
+            }
         },
-        Cancel: function() {
-          fhemConfigDialog.dialog( "close" );
+        {
+            text: "Ok",
+            icon: "ui-icon-check",
+            click: function() {
+              config.fhemHost = $( "#fhemHost" ).val();
+              config.fhemUser = $( "#fhemUser" ).val();
+              config.fhemPassword = $( "#fhemPassword" ).val();
+              config.proxyHost = $( "#proxyHost" ).val();
+              config.proxyPort = $( "#proxyPort" ).val();
+              saveConfiguration();
+              fhemConfigDialog.dialog( "close" );
+            }
         }
-      }
+      ]
     });
 
     fhemConfigDialog.find( "form" ).on( "submit", function( event ) {
@@ -349,7 +367,7 @@ function getPageName() {
     var url = new URL(window.location.href);
     var pageName = url.searchParams.get("page");
     if (pageName == null) {
-      pageName = "home";
+      pageName = "Home";
     }
 
     return pageName;
@@ -684,20 +702,6 @@ $(document).ready(function() {
 
   $(document).contextMenu({
         selector: 'body',
-        callback: function(key, options) {
-            console.log(key);
-//            if (key == 'menu_mode_edit') {
-//                config.mode = 'view';
-//                updateEditMode();
-//                saveConfiguration();
-//            }
-//            if (key == 'menu_mode_view') {
-//                config.mode = 'edit';
-//                updateEditMode();
-//                saveConfiguration();
-//            }
-
-        },
         items: {
             "menu_mode_edit": {
                 name: "Edit",
@@ -778,7 +782,7 @@ $(document).ready(function() {
                     },
                     "menu_add_new_gauge": {
                         name: "Gauge",
-                        icon: "fab fa-audible",
+                        icon: "fas fa-circle-notch",
                         disabled: function(key, opt) {
                             return config.mode == 'view';
                         },
@@ -886,43 +890,3 @@ $(document).ajaxStart(function(){
 }).ajaxStop(function(){
   $('#ajaxBusy').hide();
 });
-
-//$.ajaxSetup({
-//    cache: false
-//});
-
-
-
-Number.prototype.map = function (in_min, in_max, out_min, out_max) {
-  return (this - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-}
-
-function toPossibleInteger(value) {
-  var result = parseFloat(value);
-  if (!isNaN(result)) {
-    if (Number.isInteger(result)) {
-      result = Math.floor(result);
-    }
-  } else {
-    result = value;
-  }
-
-  return result;
-}
-
-function millisecondsToDateTime(millisecs) {
-    var t = new Date(1970, 0, 1); // Epoch
-    t.setMilliseconds(millisecs);
-    return t;
-}
-
-function secondsToDateTime(secs) {
-    var t = new Date(1970, 0, 1); // Epoch
-    t.setSeconds(secs);
-    return t;
-}
-
-Date.prototype.addHours = function(h) {
-   this.setTime(this.getTime() + (h*60*60*1000));
-   return this;
-}

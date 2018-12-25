@@ -192,20 +192,24 @@ class AddNewReadingDialog {
         height: 450,
         modal: true,
         autoOpen: false,
-        buttons: {
-          Ok: function() {
-            var foundDevice = _this.jsonDevices.find(function(element) {
-              return element.deviceName == _this.selectedDevice;
-            });
-            var foundReading = foundDevice.readings.split(',').find(function(element) {
-              return typeof element[_this.selectedReading] != 'undefined';
-            });
+        buttons: [
+            {
+              text: "Ok",
+              icon: "ui-icon-check",
+              click: function() {
+                var foundDevice = _this.jsonDevices.find(function(element) {
+                  return element.deviceName == _this.selectedDevice;
+                });
+                var foundReading = foundDevice.readings.split(',').find(function(element) {
+                  return typeof element[_this.selectedReading] != 'undefined';
+                });
 
-            $( this ).dialog( "close" );
+                $( this ).dialog( "close" );
 
-            _this.addNewReading();
-          }
-        }
+                _this.addNewReading();
+              }
+            }
+         ]
       });
 
       $( "#readingDialogSelectDevice" ).selectmenu({

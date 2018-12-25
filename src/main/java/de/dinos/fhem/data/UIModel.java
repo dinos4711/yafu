@@ -120,7 +120,7 @@ public class UIModel extends ContainerOf<Page> {
   }
 
   public static void main(String[] args) {
-    UIModel model = new UIModel("home");
+    UIModel model = new UIModel("Home");
 
     Page page1 = new Page("page 1");
     Page page2 = new Page("page 2");

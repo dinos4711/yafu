@@ -103,7 +103,7 @@ class YafuTimerButton {
         this.myButton = $("div[ui-uuid=" + this.cell.id + "]");
         this.myButton.on("click", function() {
             if (config.mode != 'edit') {
-                new TimersDialog(thisYafuTimerButton.cell);
+                new AddNewTimerDialog(thisYafuTimerButton.cell);
             }
         });
     }
@@ -169,7 +169,8 @@ class TimersDialog {
             buttons: [
                 {
                     id: "timersDialogButtonAdd",
-                    text: "Add",
+                    text: "Add timer",
+                    icon: "ui-icon-clock",
                     click: function() {
                         dialog.dialog( "close" );
                         new AddNewTimerDialog(thisTimersDialog.cell);
@@ -178,12 +179,15 @@ class TimersDialog {
                 {
                     id: "timersDialogButtonOk",
                     text: "Ok",
+                    icon: "ui-icon-check",
                     click: function() {
                         dialog.dialog( "close" );
                     }
                 }
               ],
-
+            open: function() {
+                $("#timersDialogButtonOk").focus();
+            },
             close: function() {
                 dialog.dialog( "destroy" );
                 var nodeToDelete = document.getElementById("timers-container")
@@ -191,8 +195,6 @@ class TimersDialog {
             }
         });
 
-        $("#timersDialogButtonAdd").button("option", "disabled", true);
-        $("#timersDialogButtonOk").button("option", "disabled", true);
     }
 
     getTimerData() {
@@ -240,8 +242,6 @@ class TimersDialog {
             });
         }
 
-        $("#timersDialogButtonAdd").button("option", "disabled", false);
-        $("#timersDialogButtonOk").button("option", "disabled", false);
     }
 
 }
@@ -299,45 +299,64 @@ class AddNewTimerDialog {
             modal: true,
             width: 650,
             height: 350,
-            buttons: {
-                Cancel: function() {
-                    dialog.dialog( "close" );
-
-                },
-                Ok: function() {
-                    var hours = hoursSelector.timeSelector("getValue");
-                    var minutes = minutesSelector.timeSelector("getValue");
-
-                    var time = "%2B" + ("00" + hours).substr(-2, 2) + ":" + ("00" + minutes).substr(-2, 2) + ":00";
-                    console.log(time);
-
-                    var value;
-                    switch (thisAddNewTimerDialog.valueMode) {
-                        case MODE_NO_VALUE:
-                            value = '';
-                            break;
-                        case MODE_SELECT_VALUE:
-                            value = thisAddNewTimerDialog.selectedValue;
-                            break;
-                        case MODE_ENTER_VALUE:
-                            value = $( "#addNewTimerDialogSelectSetterValue" ).val();
-                            break;
-                        case MODE_RGB_VALUE:
-                            value = $( "#addNewTimerDialogSelectSetterValue" ).val();
-                            value = value.replace("#", "");
-                            break;
-                        case MODE_HUE_VALUE:
-                            value = $( "#addNewTimerDialogSelectSetterValue" ).val();
-                            break;
+            buttons: [
+                {
+                    text: "Timers",
+                    icon: "ui-icon-clock",
+                    click: function() {
+                        dialog.dialog( "close" );
+                        new TimersDialog(thisAddNewTimerDialog.cell);
                     }
-                    var somethingUnique = uuidv4().replace(/-/g, "_");
-                    var fhemCommand = 'define yafu_' + thisAddNewTimerDialog.cell.device + '_' + somethingUnique + ' at ' + time +
-                        ' set ' + thisAddNewTimerDialog.cell.device + ' ' + thisAddNewTimerDialog.cell.setter + ' ' + value;
+                },
+                {
+                    text: "Cancel",
+                    icon: "ui-icon-cancel",
+                    click: function() {
+                        dialog.dialog( "close" );
+                    }
+                },
+                {
+                    id: "newTimerDialogButtonOk",
+                    text: "Ok",
+                    icon: "ui-icon-check",
+                    click: function() {
+                        var hours = hoursSelector.timeSelector("getValue");
+                        var minutes = minutesSelector.timeSelector("getValue");
 
-                    sendCommandToFhem(fhemCommand);
+                        var time = "%2B" + ("00" + hours).substr(-2, 2) + ":" + ("00" + minutes).substr(-2, 2) + ":00";
+                        console.log(time);
 
-                    dialog.dialog( "close" );
+                        var value;
+                        switch (thisAddNewTimerDialog.valueMode) {
+                            case MODE_NO_VALUE:
+                                value = '';
+                                break;
+                            case MODE_SELECT_VALUE:
+                                value = thisAddNewTimerDialog.selectedValue;
+                                break;
+                            case MODE_ENTER_VALUE:
+                                value = $( "#addNewTimerDialogSelectSetterValue" ).val();
+                                break;
+                            case MODE_RGB_VALUE:
+                                value = $( "#addNewTimerDialogSelectSetterValue" ).val();
+                                value = value.replace("#", "");
+                                break;
+                            case MODE_HUE_VALUE:
+                                value = $( "#addNewTimerDialogSelectSetterValue" ).val();
+                                break;
+                        }
+                        var somethingUnique = uuidv4().replace(/-/g, "_");
+                        var fhemCommand = 'define yafu_' + thisAddNewTimerDialog.cell.device + '_' + somethingUnique + ' at ' + time +
+                            ' set ' + thisAddNewTimerDialog.cell.device + ' ' + thisAddNewTimerDialog.cell.setter + ' ' + value;
+
+                        sendCommandToFhem(fhemCommand);
+
+                        dialog.dialog( "close" );
+                    }
                 }
+            ],
+            open: function() {
+                $("#newTimerDialogButtonOk").focus();
             },
             close: function() {
                 dialog.dialog( "destroy" );
@@ -503,20 +522,24 @@ class AddNewTimerButtonDialog {
       height: 350,
       modal: true,
       autoOpen: false,
-      buttons: {
-        Ok: function() {
-          var foundDevice = thisTimerButtonDialog.jsonDevices.find(function(element) {
-            return element.deviceName == thisTimerButtonDialog.selectedDevice;
-          });
-          var foundSetter = foundDevice.setters.find(function(element) {
-            return typeof element[thisTimerButtonDialog.selectedSetter] != 'undefined';
-          });
-          var values = foundSetter[thisTimerButtonDialog.selectedSetter];
-          var withLabel = document.getElementById("timerButtonDialogWithLabel").checked;
-          $( this ).dialog( "close" );
-          thisTimerButtonDialog.addNewTimerButton(values, withLabel);
-        }
-      }
+      buttons: [
+          {
+            text: "Ok",
+            icon: "ui-icon-check",
+            click: function() {
+              var foundDevice = thisTimerButtonDialog.jsonDevices.find(function(element) {
+                return element.deviceName == thisTimerButtonDialog.selectedDevice;
+              });
+              var foundSetter = foundDevice.setters.find(function(element) {
+                return typeof element[thisTimerButtonDialog.selectedSetter] != 'undefined';
+              });
+              var values = foundSetter[thisTimerButtonDialog.selectedSetter];
+              var withLabel = document.getElementById("timerButtonDialogWithLabel").checked;
+              $( this ).dialog( "close" );
+              thisTimerButtonDialog.addNewTimerButton(values, withLabel);
+            }
+          }
+      ]
     });
 
     $( "#timerButtonDialogSelectDevice" ).selectmenu({
