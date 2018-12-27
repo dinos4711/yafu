@@ -337,7 +337,8 @@ class AddNewTimerDialog {
                 }
             ],
             open: function() {
-                $("#newTimerDialogButtonOk").focus();
+                var buttons = $('.selector').dialog('option', 'buttons');
+                $(":button:contains('Ok')").prop("disabled", true).addClass("ui-state-disabled");
             },
             close: function() {
                 dialog.dialog( "destroy" );
@@ -362,6 +363,8 @@ class AddNewTimerDialog {
             valueChanged: function( event, data ) {
                 console.log(data.value);
                 $("#addNewTimerDialogSelectSetterValueLogger").text(data.value);
+                $(":button:contains('Ok')").prop("disabled", false).removeClass("ui-state-disabled");
+                $("#newTimerDialogButtonOk").focus();
             }
         });
 
