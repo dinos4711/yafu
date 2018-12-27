@@ -13,6 +13,10 @@ class YafuSwitch {
        	<div label-id="' + this.cell.id + '" class="editable" style="position: absolute; top: 0px; left: 100px">' + this.cell.name + '</div>\
     ';
 
+    if (!this.cell.icon) {
+        this.cell.icon = "fa-power-off";
+    }
+
     var cellElement = document.createElement("div");
     cellElement.setAttribute("class", "editable toggle switch-wrapper");
     cellElement.setAttribute("draggable-id", this.cell.id);
@@ -92,6 +96,7 @@ class YafuSwitch {
     });
 
     this.mySwitch = $("#" + this.cell.id).famultibutton({
+        icon: _this.cell.icon,
 		offColor: '#2A2A2A',
 		offBackgroundColor: '#808080',
 		onColor: '#2A2A2A',
@@ -146,7 +151,10 @@ class YafuSwitch {
   }
 
   inform(deviceReading, value) {
-    var myReading = this.cell.device + '-state';
+    var myReading = this.cell.device.replace(/ /g, "-");
+    if (!myReading.includes("-")) {
+        myReading += "-state";
+    }
 
     if (myReading == deviceReading) {
         if (value == 'on') {
@@ -177,6 +185,12 @@ class AddNewSwitchDialog {
                       <option>Please wait ...</option>\
                   </select>\
               </td>\
+            <tr>\
+                <td><label for="switchDialogSelectIcon">Icon</label></td>\
+                <td>\
+                    <input id="switchDialogSelectIcon" class="form-control icp icp-auto" value="" type="text"/>\
+                </td>\
+            </tr>\
           </tr>\
       </table>';
 
@@ -187,6 +201,11 @@ class AddNewSwitchDialog {
     document.body.appendChild(divElement);
 
     var _this = this;
+
+      $('#switchDialogSelectIcon').iconpicker();
+      $('#switchDialogSelectIcon').on('iconpickerSelected', function(event){
+        _this.selectedIcon = event.iconpickerValue;
+      });
 
     this.dialog = $( "#switchDialog" ).dialog({
       width: 650,
@@ -226,7 +245,8 @@ class AddNewSwitchDialog {
         id: uuidv4(),
         name: this.selectedDeviceName,
         device: this.selectedDevice,
-        position: { left: mainDialog.mouse.x, top: mainDialog.mouse.y }
+        position: { left: mainDialog.mouse.x, top: mainDialog.mouse.y },
+        icon: this.selectedIcon,
     };
     var yafuSwitch = new YafuSwitch(cell, true);
     allCells.push(yafuSwitch);

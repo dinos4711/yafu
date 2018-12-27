@@ -14,7 +14,7 @@ class YafuTimerButton {
             </div>\
         ';
         if (cell.withLabel) {
-            myContent += '<div label-id="' + this.cell.id + '" class="editable" style="position: absolute; top: 0px; left: 100px">' + this.cell.name + '</div>';
+            myContent += '<div label-id="' + this.cell.id + '" class="editable" style="position: absolute; top: 0px; left: 100px">' + this.cell.name + ':' + this.cell.setter + '</div>';
         }
 
         var cellElement = document.createElement("div");
@@ -82,7 +82,7 @@ class YafuTimerButton {
             $(this).css({top: myTop, left: myLeft});
 
             if (thisYafuTimerButton.cell.withLabel) {
-                $("div[label-id=" + thisYafuTimerButton.cell.id + "]").text(thisYafuTimerButton.cell.name);
+                $("div[label-id=" + thisYafuTimerButton.cell.id + "]").text(thisYafuTimerButton.cell.name + ':' + thisYafuTimerButton.cell.setter);
             }
             $("#infoBox").text("");
             thisYafuTimerButton.cell.position = $(this).position();
@@ -154,7 +154,7 @@ class TimersDialog {
         var cellElement = document.createElement("div");
         cellElement.setAttribute("id", "timers-container");
         cellElement.setAttribute("class", "ui-widget");
-        cellElement.setAttribute("title", "Timers for " + this.cell.name);
+        cellElement.setAttribute("title", "Timers for " + this.cell.name + ':' + this.cell.setter);
 
         cellElement.innerHTML = myContent;
         document.getElementById("uicontainer").appendChild(cellElement);
@@ -246,12 +246,6 @@ class TimersDialog {
 
 }
 
-const MODE_NO_VALUE     = 0;
-const MODE_SELECT_VALUE = 1;
-const MODE_ENTER_VALUE  = 2;
-const MODE_RGB_VALUE    = 3;
-const MODE_HUE_VALUE    = 4;
-
 class AddNewTimerDialog {
     constructor(cell) {
         this.cell = cell;
@@ -263,20 +257,24 @@ class AddNewTimerDialog {
             <tr>\
                 <td><label for="addNewTimerDialogSelectSetterValue">Value to set</label></td>\
                 <td>\
-                    <select id="addNewTimerDialogSelectSetterValue">\
-                        <option>Please wait ...</option>\
-                    </select>\
+                    <div id="addNewTimerDialogSelectSetterValue">\
+                    Please wait ...\
+                    </div>\
+                </td>\
+                <td>\
+                    <label id="addNewTimerDialogSelectSetterValueLogger" style="width: 50px"></label>\
                 </td>\
             </tr>\
             <tr>\
                 <td><label for="addNewTimerDialogMinutesSelector">Time from now</label></td>\
                 <td><div id="addNewTimerDialogHoursSelector"></div><div id="addNewTimerDialogMinutesSelector"></div></td>\
+                <td></td>\
             </tr>\
         </table>';
 
         var cellElement = document.createElement("div");
         cellElement.id="newTimerDialog";
-        cellElement.title="New Timer for " + cell.name + " and " + cell.setter;
+        cellElement.title="New Timer for " + cell.name + ":" + cell.setter;
         cellElement.innerHTML = myContent;
         document.getElementById("uicontainer").appendChild(cellElement);
 
@@ -326,25 +324,8 @@ class AddNewTimerDialog {
                         var time = "%2B" + ("00" + hours).substr(-2, 2) + ":" + ("00" + minutes).substr(-2, 2) + ":00";
                         console.log(time);
 
-                        var value;
-                        switch (thisAddNewTimerDialog.valueMode) {
-                            case MODE_NO_VALUE:
-                                value = '';
-                                break;
-                            case MODE_SELECT_VALUE:
-                                value = thisAddNewTimerDialog.selectedValue;
-                                break;
-                            case MODE_ENTER_VALUE:
-                                value = $( "#addNewTimerDialogSelectSetterValue" ).val();
-                                break;
-                            case MODE_RGB_VALUE:
-                                value = $( "#addNewTimerDialogSelectSetterValue" ).val();
-                                value = value.replace("#", "");
-                                break;
-                            case MODE_HUE_VALUE:
-                                value = $( "#addNewTimerDialogSelectSetterValue" ).val();
-                                break;
-                        }
+                        var value = thisAddNewTimerDialog.setterElement.setterWidget("getValue");
+
                         var somethingUnique = uuidv4().replace(/-/g, "_");
                         var fhemCommand = 'define yafu_' + thisAddNewTimerDialog.cell.device + '_' + somethingUnique + ' at ' + time +
                             ' set ' + thisAddNewTimerDialog.cell.device + ' ' + thisAddNewTimerDialog.cell.setter + ' ' + value;
@@ -374,107 +355,15 @@ class AddNewTimerDialog {
 
         var valuesString = this.cell.values;
 
-        var values = valuesString.split(',');
-        if (values[0] == 'slider') {
-          var vMin  = parseFloat(values[1]);
-          var vStep = parseFloat(values[2]);
-          var vMax  = parseFloat(values[3]);
-
-          values = new Array();
-          for (var i = vMin ; i <= vMax; i += vStep) {
-            values.push(i);
-          }
-        }
-
-        this.valueMode = MODE_SELECT_VALUE;
-
-        if (values.length == 0) {
-            this.valueMode = MODE_NO_VALUE;
-        }
-        if (values.length == 1) {
-            if (values[0] == 'noArg') {
-                this.valueMode = MODE_NO_VALUE;
-                this.selectedValue = '';
+        this.setterElement = $("#addNewTimerDialogSelectSetterValue").setterWidget({
+            fillColorValue: "#00ff00",
+            fillColorVirtualValue: "#00ff00",
+            values: valuesString,
+            valueChanged: function( event, data ) {
+                console.log(data.value);
+                $("#addNewTimerDialogSelectSetterValueLogger").text(data.value);
             }
-            if (values[0] == '') {
-                this.valueMode = MODE_ENTER_VALUE;
-            }
-        }
-
-        if (values[0] == 'colorpicker') {
-            if (values[1] == 'RGB') {
-                this.valueMode = MODE_RGB_VALUE;
-            }
-            if (values[1] == 'HUE') {
-                this.valueMode = MODE_HUE_VALUE;
-            }
-        }
-
-        console.log(this.valueMode);
-
-//            <tr>\
-//                <td><label for="addNewTimerDialogSelectSetterValue">Value</label></td>\
-//                <td>\
-//                    <select id="addNewTimerDialogSelectSetterValue">\
-//                        <option>Please wait ...</option>\
-//                    </select>\
-//                </td>\
-//            </tr>\
-
-        var addNewTimerDialogSelectSetterValue = document.getElementById("addNewTimerDialogSelectSetterValue")
-        var tdNode = addNewTimerDialogSelectSetterValue.parentNode;
-        var trNode = tdNode.parentNode;
-        trNode.removeChild(tdNode);
-
-        var valueNodeContent;
-        switch (this.valueMode) {
-            case MODE_NO_VALUE:
-                valueNodeContent = '<div id="addNewTimerDialogSelectSetterValue"></div>'; // place holder
-                this.selectedValue = '';
-                break;
-            case MODE_SELECT_VALUE:
-                valueNodeContent = '\
-                    <select id="addNewTimerDialogSelectSetterValue">\
-                        <option>Please wait ...</option>\
-                    </select>\
-                ';
-                break;
-            case MODE_ENTER_VALUE:
-                valueNodeContent = '<input type="text" name="time" id="addNewTimerDialogSelectSetterValue" class="text ui-widget-content ui-corner-all">';
-                break;
-            case MODE_RGB_VALUE:
-                valueNodeContent = '<input type="color" name="color" id="addNewTimerDialogSelectSetterValue" />';
-                break;
-            case MODE_HUE_VALUE:
-                valueNodeContent = '<input id="addNewTimerDialogSelectSetterValue" type="range" min="0" max="360" step="1" class="hue-range"/>';
-                break;
-        }
-
-        tdNode = document.createElement("td");
-        tdNode.innerHTML = valueNodeContent;
-        trNode.appendChild(tdNode);
-
-        if (this.valueMode == MODE_SELECT_VALUE) {
-            var selectValuesDOM = document.getElementById("addNewTimerDialogSelectSetterValue");
-            selectValuesDOM.innerHTML = "";
-            var isFirst = 1;
-            for (var i in values) {
-                var optionDiv = document.createElement("option");
-                optionDiv.innerHTML = values[i];
-                optionDiv.setAttribute("value", values[i]);
-                selectValuesDOM.appendChild(optionDiv);
-                if (isFirst == 1) {
-                    isFirst = 0;
-                    this.selectedValue = values[i];
-                }
-            }
-            $( "#addNewTimerDialogSelectSetterValue" ).selectmenu({
-                width: 450,
-                change: function( event, data ) {
-                    thisAddNewTimerDialog.selectedValue = data.item.element.attr("value");
-                }
-            });
-        }
+        });
 
     }
 }

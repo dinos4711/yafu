@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Time selector test</title>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="css/jquery-ui.css">
+
+    <link rel="stylesheet" href="css/ui.css">
+    <script src="js/yafu-tools.js"></script>
+    <script src="js/yafu-setter-widget.js"></script>
+    <script src="js/yafu-slider-widget.js"></script>
+
+</head>
+<body>
+
+<div id="setterWidgetNoValue">
+No value
+</div>
+
+<br><br>
+
+<div id="setterWidgetSelectValue">
+Select value
+</div>
+
+<br><br>
+
+<div id="setterWidgetEnterValue">
+Enter value
+</div>
+
+<br><br>
+
+<div id="setterWidgetRGBValue">
+RGB value
+</div>
+
+<br><br>
+
+<div id="setterWidgetHUEValue">
+HUE value
+</div>
+
+<br><br>
+
+<script>
+    $(document).ready(function() {
+        var setterWidgetNoValue = $( "#setterWidgetNoValue" ).setterWidget({
+            values: "noArg"
+        });
+        var setterWidgetSelectValue = $( "#setterWidgetSelectValue" ).setterWidget({
+            values: "slider,0,4,100",
+            virtualValueChanged: function(event, data) {
+                console.log("virtual value : " + data.value);
+            },
+            valueChanged: function(event, data) {
+                console.log("real value    : " + data.value);
+            }
+        });
+        setterWidgetSelectValue.setterWidget("setValue", 8);
+
+        var setterWidgetEnterValue = $( "#setterWidgetEnterValue" ).setterWidget({
+            values: "",
+            valueChanged: function(event, data) {
+                console.log("real value    : " + data.value);
+            }
+        });
+        var setterWidgetRGBValue = $( "#setterWidgetRGBValue" ).setterWidget({
+            values: "colorpicker,RGB",
+            valueChanged: function(event, data) {
+                console.log("real value    : " + data.value);
+            }
+        });
+        var setterWidgetHUEValue = $( "#setterWidgetHUEValue" ).setterWidget({
+            values: "colorpicker,HUE",
+            valueChanged: function(event, data) {
+                console.log("real value    : " + data.value);
+            }
+        });
+    });
+
+</script>
+
+</body>
+</html>

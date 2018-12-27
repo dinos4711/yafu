@@ -700,6 +700,14 @@ $(document).ready(function() {
 //  }, false);
 //
 
+  document.addEventListener('contextmenu', function(evt) {
+    console.log(evt.target.localName);
+    if (evt.target.localName == 'body') {
+      mainDialog.mouse = {"x": evt.clientX, "y": evt.clientY};
+    }
+  }, false);
+
+
   $(document).contextMenu({
         selector: 'body',
         items: {

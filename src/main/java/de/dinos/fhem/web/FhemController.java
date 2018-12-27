@@ -158,14 +158,39 @@ public class FhemController {
 
     if ("getDevicesWithSwitches".equals(cmd)) {
       devices = getDevices();
-      Set<Device> switchDevices = devices.getSwitchDevices();
-      JSONArray jsonDevices = new JSONArray();
-      for (Device switchDevice : switchDevices) {
-        JSONObject jsonDevice = new JSONObject();
-        jsonDevice.put("deviceName", switchDevice.getName());
-        jsonDevice.put("displayName", switchDevice.getDisplayName());
+      Map<Device, List<String>> switchDevices = new TreeMap<>();
 
-        jsonDevices.put(jsonDevice);
+      for (Device device : devices) {
+        if (device.getSetters().get("on") != null && device.getSetters().get("off") != null && device.getReadings().contains("state")) {
+          List<String> setters = switchDevices.computeIfAbsent(device, device1 -> new ArrayList<>());
+          setters.add(null);
+        }
+        for (Map.Entry<String, List<String>> keyValues : device.getSetters().entrySet()) {
+          String setter = keyValues.getKey();
+          List<String> values = keyValues.getValue();
+          if (values.contains("on") && values.contains("off")) {
+            List<String> setters = switchDevices.computeIfAbsent(device, device1 -> new ArrayList<>());
+            setters.add(setter);
+          }
+        }
+      }
+
+      JSONArray jsonDevices = new JSONArray();
+      for (Map.Entry<Device, List<String>> deviceListEntry : switchDevices.entrySet()) {
+        for (String setter : deviceListEntry.getValue()) {
+          JSONObject jsonDevice = new JSONObject();
+          Device device = deviceListEntry.getKey();
+          String name = device.getName();
+          String displayName = device.getDisplayName();
+          if (setter != null) {
+            name += " " + setter;
+            displayName += " (" + setter + ")";
+          }
+          jsonDevice.put("deviceName", name);
+          jsonDevice.put("displayName", displayName);
+
+          jsonDevices.put(jsonDevice);
+        }
       }
       return jsonDevices.toString();
     }
@@ -239,12 +264,6 @@ public class FhemController {
     }
 
     return "Ok.";
-  }
-
-  public static void main(String[] args) {
-    FhemController fhemController = new FhemController();
-    String result = fhemController.sendRemoveMenuEntryToServer("Home");
-    System.out.println(result);
   }
 
   @RequestMapping(value = "/sendRemoveMenuEntryToServer", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
@@ -342,4 +361,9 @@ public class FhemController {
     return null;
   }
 
+  public static void main(String[] args) {
+    FhemController fhemController = new FhemController();
+    String result = fhemController.getContentFromServer("getDevicesWithSwitches");
+    System.out.println(result);
+  }
 }
