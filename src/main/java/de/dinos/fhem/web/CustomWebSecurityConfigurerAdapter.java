@@ -18,30 +18,32 @@ import java.util.Properties;
 @EnableWebSecurity
 public class CustomWebSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
 
+  public static final File BASIC_AUTH_FILE = new File("basic-auth.properties");
   @Autowired
   private MyBasicAuthenticationEntryPoint authenticationEntryPoint;
 
   @Autowired
   public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-    Properties authProperties = new Properties();
-    authProperties.load(new FileReader(new File("basic-auth.properties")));
+    if (BASIC_AUTH_FILE.exists()) {
+      Properties authProperties = new Properties();
+      authProperties.load(new FileReader(BASIC_AUTH_FILE));
 
-    auth.inMemoryAuthentication()
-        .withUser(authProperties.getProperty("user")).password(passwordEncoder().encode(authProperties.getProperty("password")))
-        .authorities("ROLE_USER");
+      auth.inMemoryAuthentication()
+          .withUser(authProperties.getProperty("user")).password(passwordEncoder().encode(authProperties.getProperty("password")))
+          .authorities("ROLE_USER");
+    }
   }
 
   @Override
   protected void configure(HttpSecurity http) throws Exception {
-    http.authorizeRequests()
-        .antMatchers("/securityNone").permitAll()
-        .anyRequest().authenticated()
-        .and()
-        .httpBasic()
-        .authenticationEntryPoint(authenticationEntryPoint);
-
-//    http.addFilterAfter(new CustomFilter(),
-//        BasicAuthenticationFilter.class);
+    if (BASIC_AUTH_FILE.exists()) {
+      http.authorizeRequests()
+          .antMatchers("/securityNone").permitAll()
+          .anyRequest().authenticated()
+          .and()
+          .httpBasic()
+          .authenticationEntryPoint(authenticationEntryPoint);
+    }
   }
 
   @Bean
