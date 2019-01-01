@@ -360,9 +360,17 @@ class AddNewTimerDialog {
             fillColorValue: "#00ff00",
             fillColorVirtualValue: "#00ff00",
             values: valuesString,
+            device: thisAddNewTimerDialog.cell.device,
+            setter: thisAddNewTimerDialog.cell.setter,
+            virtualValueChanged: function( event, data ) {
+                console.log(data.value);
+                $("#addNewTimerDialogSelectSetterValueLogger").text(data.value);
+                $("#addNewTimerDialogSelectSetterValueLogger").css({ 'color': '#00ff00' });
+            },
             valueChanged: function( event, data ) {
                 console.log(data.value);
                 $("#addNewTimerDialogSelectSetterValueLogger").text(data.value);
+                $("#addNewTimerDialogSelectSetterValueLogger").css({ 'color': 'white' });
                 $(":button:contains('Ok')").prop("disabled", false).removeClass("ui-state-disabled");
                 $("#newTimerDialogButtonOk").focus();
             }

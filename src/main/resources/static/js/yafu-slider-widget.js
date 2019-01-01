@@ -66,9 +66,17 @@
             this.xOffset = 4 * this.helperRadius / 3;
             this.setValue(this.values[0]);
             this.helperPosition = null;
-            this.helperValue = null;
+            this.helperValue = this.values[0];
+            this._trigger( "valueChanged", null, { value: this.helperValue });
 
             this._draw();
+
+            getDeviceReading(this.options.device, this.options.setter, function(response, yafuReading) {
+                var value = response.Results[0].Readings[_this.options.setter].Value;
+                console.log(value);
+                _this._trigger( "valueChanged", null, { value: value });
+                _this.setValue(value);
+            }, this);
         },
 
         _mousedown: function (evt, isTouch) {
@@ -93,6 +101,8 @@
               this.helperPosition = null;
               this.drag = false;
             }
+
+
 
             this._draw();
         },

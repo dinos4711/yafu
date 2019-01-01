@@ -107,6 +107,8 @@ Object.freeze(SetterMode);
                         fillColorValue: this.options.fillColorValue,
                         fillColorVirtualValue: this.options.fillColorVirtualValue,
                         values: values.join(),
+                        device: _this.options.device,
+                        setter: _this.options.setter,
                         virtualValueChanged: function( event, data ) {
                             _this._trigger( "virtualValueChanged", null, { value: data.value });
                         },
