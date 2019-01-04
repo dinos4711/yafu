@@ -71,12 +71,14 @@
 
             this._draw();
 
-            getDeviceReading(this.options.device, this.options.setter, function(response, yafuReading) {
-                var value = response.Results[0].Readings[_this.options.setter].Value;
-                console.log(value);
-                _this._trigger( "valueChanged", null, { value: value });
-                _this.setValue(value);
-            }, this);
+            if (typeof getDeviceReading == 'function') {
+                getDeviceReading(this.options.device, this.options.setter, function(response, yafuReading) {
+                    var value = response.Results[0].Readings[_this.options.setter].Value;
+                    console.log(value);
+                    _this._trigger( "valueChanged", null, { value: value });
+                    _this.setValue(value);
+                }, this);
+            }
         },
 
         _mousedown: function (evt, isTouch) {
@@ -239,6 +241,25 @@
             ctx.lineWidth = 1;
             ctx.arc(position, this.canvas.height / 2, this.helperRadius, 0, 2 * Math.PI);
             ctx.stroke();
+        },
+
+        resize: function(value) {
+            this.canvas.width = value["width"];
+            this.canvas.height = value["height"];
+            $('#' + this.id).css(value);
+
+            this.helperRadius = 3 * this.canvas.height / 8;
+            this.xOffset = 4 * this.helperRadius / 3;
+
+            if (this.helperPosition != null) {
+                this.helperPosition = this._valueToPosition(this.helperValue);
+            }
+            if (this.valuePosition != null) {
+                this.valuePosition = this._valueToPosition(this.value);
+            }
+
+            this.context = this.canvas.getContext("2d");
+            this._draw();
         },
 
         setValue: function(value) {

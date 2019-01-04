@@ -75,7 +75,7 @@ Object.freeze(SetterMode);
                     break;
                 case SetterMode.SelectValue:
                     valueNodeContent = '\
-                        <div id="' + this.id + '">\
+                        <div id="' + this.id + '" class=".editable">\
                         </div>\
                     ';
                     break;
@@ -121,6 +121,21 @@ Object.freeze(SetterMode);
                     break;
             }
 
+            $("#" + this.id).draggable().resizable({
+                resize: function( event, ui ) {
+                    _this.resize({width: ui.size.width, height: ui.size.height});
+                },
+                stop: function( event, ui ) {
+                    _this.resize({width: ui.size.width, height: ui.size.height});
+                }
+            });
+        },
+
+        resize: function(value) {
+            switch (this.valueMode) {
+                case SetterMode.SelectValue:
+                    this.sliderWidget.sliderWidget("resize", value);
+            }
         },
 
         setValue: function(value) {

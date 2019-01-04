@@ -27,7 +27,7 @@ class YafuSlider {
     }
 
     var myContent = '\
-        <div ui-uuid="' + this.cell.id + '" yafu-inform="' + this.cell.device + '-' + this.cell.setter + '">\
+        <div id="' + this.cell.id + 'xxx" ui-uuid="' + this.cell.id + '" yafu-inform="' + this.cell.device + '-' + this.cell.setter + '">\
           <div id="' + this.customHandleId + '" class="ui-slider-handle yafu-slider-handle"></div>\
         </div>\
         <div label-id="' + this.cell.id + '" class="editable" style="position: absolute; top: 0px; left: 100px">' + this.cell.name + '</div>\
@@ -113,6 +113,10 @@ class YafuSlider {
 
     this.mySlider = $("div[ui-uuid=" + this.cell.id + "]");
 
+//    this.mySlider = this.mySlider.setterWidget({
+//        values: _this.cell.values
+//    });
+//
     this.mySlider = this.mySlider.slider({
       min : 0,
       max : _this.values.length - 1,
