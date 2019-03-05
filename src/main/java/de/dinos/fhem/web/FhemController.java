@@ -114,7 +114,7 @@ public class FhemController {
 
     devices = getDevices();
     for (Device device : devices) {
-      if ("at".equals(device.getType()) && device.getName().startsWith("yafu_" + deviceName + "_")) {
+      if ("at".equals(device.getType()) && device.getName().startsWith("yafu_" + deviceName + "__")) {
         result.put(device.toJSON());
       }
     }

@@ -327,7 +327,7 @@ class AddNewTimerDialog {
                         var value = thisAddNewTimerDialog.setterElement.setterWidget("getValue");
 
                         var somethingUnique = uuidv4().replace(/-/g, "_");
-                        var fhemCommand = 'define yafu_' + thisAddNewTimerDialog.cell.device + '_' + somethingUnique + ' at ' + time +
+                        var fhemCommand = 'define yafu_' + thisAddNewTimerDialog.cell.device + '__' + somethingUnique + ' at ' + time +
                             ' set ' + thisAddNewTimerDialog.cell.device + ' ' + thisAddNewTimerDialog.cell.setter + ' ' + value;
 
                         sendCommandToFhem(fhemCommand);
