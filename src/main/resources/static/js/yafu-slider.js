@@ -196,11 +196,25 @@ class YafuSlider {
     var mySetter = this.cell.device + '-' + this.cell.setter;
 
     if (mySetter == deviceSetter) {
+      var found = 0;
       for (var v in this.values) {
         if (this.values[v] == value) {
           this.mySlider.slider("value", v);
           this.handle.text( this.values[v] );
+          found = 1;
         }
+      }
+      if (!found) {
+        for (var v in this.values) {
+          if (parseInt(this.values[v]) == parseInt(value)) {
+            this.mySlider.slider("value", v);
+            this.handle.text( this.values[v] );
+            found = 1;
+          }
+        }
+      }
+      if (!found) {
+        console.log("Could not map " + value + " to a value from the slider.");
       }
     }
 
